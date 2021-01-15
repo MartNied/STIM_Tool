@@ -8,3 +8,11 @@ The main App is stim_tool.py\
 The PhotoViewer.py class is used to display images on the GUI\
 The .ui file is the GUI created with Qt Designer
 
+## Helpful Links and resources
+### OpenCv
+Beginner Tutorial:      https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_tutorials.html
+OpenCv Documentation:   https://docs.opencv.org/master/
+
+### PyQt5
+Beginner Tutorial:      https://www.youtube.com/watch?v=ejfQCi2O6Ao
+Qt Documentation:       https://doc.qt.io/qt-5/reference-overview.html
