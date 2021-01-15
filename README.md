@@ -16,3 +16,7 @@ OpenCv Documentation:   https://docs.opencv.org/master/
 ### PyQt5
 Beginner Tutorial:      https://www.youtube.com/watch?v=ejfQCi2O6Ao \
 Qt Documentation:       https://doc.qt.io/qt-5/reference-overview.html
+
+
+### GitHub
+Github Tutorial:        https://www.youtube.com/watch?v=3RjQznt-8kE&list=PL4cUxeGkcC9goXbgTDQ0n_4TBzOO0ocPR
