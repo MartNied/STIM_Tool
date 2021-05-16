@@ -1,30 +1,5 @@
- JC Chouinard
-
-    About Me
-    Python SEO
-    Git and Github
-    Search Console API
-    Buy Me a Coffee
-
-JC Chouinard > Web dev > Simple .gitignore Template
-By jean-christophe-chouinard 19 novembre 2020
-Simple .gitignore Template
-Share this post
-
-    This post is part of the complete guide on Git and Github
-
-The .gitignore file is useful to specify what you want, and what you don’t want to be committed to Github.
-
-In this post, I will give you a simple Gitignore template to make sure that you don’t commit stuff that you don’t want.
-Ignoring Files in Git Using Gitignore
-
-Ignored files are defined in a file named .gitignore that is checked in at the root of your repository. 
-
-By adding a gitignore file to the root your repository, you can make sure that critical elements like your credentials and passwords does not get pushed to your public Github profile.
-Gitignore Template
-
-Save this in a .gitignore extension.
-$ touch .gitignore
+# Certain Folders and files
+test_data/
 # VSCode
 .vscode/*
 !.vscode/settings.json
