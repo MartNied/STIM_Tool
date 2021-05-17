@@ -11,8 +11,8 @@
 
 3) User Interface: 
 	- Visual Feedback of counted structures
-	- User interaction: Remove marked structures
 	- ROI Selecter: Cut tool: Use Input image Select ROI Perform processing
+	- User interaction: Remove marked structures
 	- Session View: Load multiple images and store the session in a csv file
 	- Session Statistic (optional)  
 				
