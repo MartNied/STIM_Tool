@@ -49,13 +49,15 @@ def cc_filter_idx(output_cc, min_area=5, max_area=520*696, min_eccentricity=0, m
         filt_idx = filt_idx[1:filt_idx.size]   
     
 
-    eccentricity = np.zeros_like(filt_idx)  #array for storing bool of the eccentricity condition (see later)
+    eccentricity = np.zeros(filt_idx.size)  #array for storing bool of the eccentricity condition (see later)
+    
+    count = 0               #counter for indexing the eccentricity array
     
     for i in filt_idx:      #iterate only over CC where Area is in [min_area, max_area]
         
         struct_mask = ((labels == i)*255).astype("uint8")   #create uint8 binary image mask for connected component with label (index) i        
         
-        contour,_ = cv2.findContours(struct_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)     #calculate outer contours of struct mask
+        contour,_ = cv2.findContours(struct_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)     #calculate outer contours of struct mask
 
         ## Fit contour and calculate eccentricity
 
@@ -68,15 +70,23 @@ def cc_filter_idx(output_cc, min_area=5, max_area=520*696, min_eccentricity=0, m
         # a = np.max(rect[1])      ### store big and small (a,b) side of the rectangle
         # b = np.min(rect[1])
         
-        assert(a > 0 & b > 0)
+        assert((a >= 0) and (b >= 0))
         
-        eccentricity[i] = np.sqrt(1-(b**2 / a**2))
+        eccentricity[count] = np.sqrt(1-(b**2 / a**2))
+        count += 1
+
+        
     
     filt_idx_eccent = np.where(np.logical_and(np.array(eccentricity) >= min_eccentricity, np.array(eccentricity) <= max_eccentricity))      #calculate indeces of filt_idx array!, where CC-Eccentricity lies in the intervall [min_eccentricity, max_eccentricity]
     
     filt_idx = filt_idx[filt_idx_eccent]  # Store the labels where Area and Eccentricity conditions are both fullfilled !!
     
     return filt_idx
+
+    # def apply_cc_filter():
+
+
+    #     pass
 
 #####################################       Main code       ###########################
 
@@ -98,28 +108,47 @@ disp_image = cv2.convertScaleAbs(im_clip_norm, alpha=(2**8 / 2**16))
 #Processing
 
 _, im_th = cv2.threshold(disp_image, 140, 255, cv2.THRESH_BINARY, None)
-
 output = cv2.connectedComponentsWithStats(im_th, connectivity=4)
 
-filt_idx = cc_filter_idx(output, min_area=5, max_area=np.prod(im.shape), min_eccentricity=0, max_eccentricity=1)
+filt_idx = cc_filter_idx(output, min_area=5, max_area=np.prod(im.shape), min_eccentricity=0, max_eccentricity=0.9)
+
+### set labels which are not contained in filt_idx to zero
+
+labels = output[1]
+stats = output[2]
+
+# labels_filt = np.copy(labels)
+
+labels_filt = np.zeros_like(labels)
+
+for i in filt_idx:
+    labels_filt[labels == i] = 1     #set everything to backgroud which is not containted in filt_idx 
 
 
-#Display images
+#display results
 
-# cv2.imshow("Threshold - image", im_th)
-# cv2.imshow("Clipped Image", im_clip_norm)
-# cv2.imshow("Converted Image", disp_image)
-# cv2.imshow("8 Bit transform", im8)
+mask = ((labels != 0)*255).astype("uint8")
+mask_filt = ((labels_filt != 0)*255).astype("uint8")
 
-struct_bin = ((labels == 168)*255).astype("uint8") ##168 was a big one
 
-contours,_ = cv2.findContours(struct_bin, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+cv2.imshow("RaW Mask", mask)
+cv2.imshow("filtered Mask", mask_filt)
 
-cnt = contours[0]
+k = cv2.waitKey(0)
+
+
+
+
+
+
+### calc and fit contours
+# struct_bin = ((labels == 168)*255).astype("uint8") ##168 was a big one
+# contours,_ = cv2.findContours(struct_bin, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+# cnt = contours[0]
 
 #Copy with RGB channel
 
-result = cv2.cvtColor(struct_bin, cv2.COLOR_GRAY2RGB)
+# result = cv2.cvtColor(struct_bin, cv2.COLOR_GRAY2RGB)
 
 ### calc min enclosing rect
 # rect = cv2.minAreaRect(cnt)
@@ -146,7 +175,7 @@ result = cv2.cvtColor(struct_bin, cv2.COLOR_GRAY2RGB)
 
 
 #display image
-# cv2.imshow("Connected Component", result)
+
 # k = cv2.waitKey(0)
 
 
