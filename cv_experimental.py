@@ -38,21 +38,45 @@ def contrast_cut(im, clip_val, dataType="uint8"):
 
 
 
-def cc_filter(bin_im, min_area=1, max_area=520*696, min_eccentricity=0, max_eccentricity=1, connectivity=4):
+def cc_filter_idx(output_cc, min_area=5, max_area=520*696, min_eccentricity=0, max_eccentricity=1):
     
-    output = cv2.connectedComponentsWithStats(bin_im, connectivity=connectivity) #Connected component analysis
-    
-    (numLabels, labels, stats, centroids) = output
+    labels = output_cc[1]
+    stats = output_cc[2]
     
     filt_idx = np.where(np.logical_and(stats[:, cv2.CC_STAT_AREA] >= min_area, stats[:, cv2.CC_STAT_AREA] <= max_area))[0]  #calculate index where CC-Area lies in the intervall [min_area, max_area] --> idx is label
     
-    if filt_idx[0] == 0:        #remove 0 label (Background)
+    if filt_idx[0] == 0:     #remove 0 label (Background)
         filt_idx = filt_idx[1:filt_idx.size]   
     
-    # for i in filt_idx:
-    #     filt_labels[filt_labels != i] = 0  #set label to zero where area is smaller than threshold (area_min)
+
+    eccentricity = np.zeros_like(filt_idx)  #array for storing bool of the eccentricity condition (see later)
     
-    pass
+    for i in filt_idx:      #iterate only over CC where Area is in [min_area, max_area]
+        
+        struct_mask = ((labels == i)*255).astype("uint8")   #create uint8 binary image mask for connected component with label (index) i        
+        
+        contour,_ = cv2.findContours(struct_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)     #calculate outer contours of struct mask
+
+        ## Fit contour and calculate eccentricity
+
+        ellipse = cv2.fitEllipse(contour[0])     ## Danger 5 points are requiered for fitting an ellipse !!                                                   
+        a = np.max(ellipse[1])      ### store big and small (a,b) semiaxis of the ellipse
+        b = np.min(ellipse[1])
+    
+        ### Alternate form using rotated rectangle
+        # rect = cv2.minAreaRect(contour[0])
+        # a = np.max(rect[1])      ### store big and small (a,b) side of the rectangle
+        # b = np.min(rect[1])
+        
+        assert(a > 0 & b > 0)
+        
+        eccentricity[i] = np.sqrt(1-(b**2 / a**2))
+    
+    filt_idx_eccent = np.where(np.logical_and(np.array(eccentricity) >= min_eccentricity, np.array(eccentricity) <= max_eccentricity))      #calculate indeces of filt_idx array!, where CC-Eccentricity lies in the intervall [min_eccentricity, max_eccentricity]
+    
+    filt_idx = filt_idx[filt_idx_eccent]  # Store the labels where Area and Eccentricity conditions are both fullfilled !!
+    
+    return filt_idx
 
 #####################################       Main code       ###########################
 
@@ -76,7 +100,8 @@ disp_image = cv2.convertScaleAbs(im_clip_norm, alpha=(2**8 / 2**16))
 _, im_th = cv2.threshold(disp_image, 140, 255, cv2.THRESH_BINARY, None)
 
 output = cv2.connectedComponentsWithStats(im_th, connectivity=4)
-(numLabels, labels, stats, centroids) = output
+
+filt_idx = cc_filter_idx(output, min_area=5, max_area=np.prod(im.shape), min_eccentricity=0, max_eccentricity=1)
 
 
 #Display images
@@ -86,8 +111,43 @@ output = cv2.connectedComponentsWithStats(im_th, connectivity=4)
 # cv2.imshow("Converted Image", disp_image)
 # cv2.imshow("8 Bit transform", im8)
 
-cv2.imshow("Connected Component",((labels != 0)*255).astype("uint8"))
-k = cv2.waitKey(0)
+struct_bin = ((labels == 168)*255).astype("uint8") ##168 was a big one
+
+contours,_ = cv2.findContours(struct_bin, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+cnt = contours[0]
+
+#Copy with RGB channel
+
+result = cv2.cvtColor(struct_bin, cv2.COLOR_GRAY2RGB)
+
+### calc min enclosing rect
+# rect = cv2.minAreaRect(cnt)
+# box = cv2.boxPoints(rect)
+# box = np.int0(box)
+# cv2.drawContours(result,[box],0,(0,0,255),2)
+
+### bounding rect
+
+# x,y,w,h = cv2.boundingRect(cnt)
+# cv2.rectangle(result, (x,y), (x+w, y+h), (100, 100, 255), 2)
+
+### min enclosing circle
+
+# (x,y),radius = cv2.minEnclosingCircle(cnt)
+# center = (int(x),int(y))
+# radius = int(radius)
+# cv2.circle(result ,center, radius,(0,255,0),2)
+
+
+### Ellipse 
+# ellipse = cv2.fitEllipse(cnt)
+# cv2.ellipse(result ,ellipse,(0,255,0),2)
+
+
+#display image
+# cv2.imshow("Connected Component", result)
+# k = cv2.waitKey(0)
 
 
 #Saving images

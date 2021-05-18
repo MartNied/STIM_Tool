@@ -1,2 +1,1 @@
-
-#clip_val = int(im.max())
+ nLabels, _ = cv2.connectedComponents(self.structMaskFilt, labels=None, connectivity=8)
