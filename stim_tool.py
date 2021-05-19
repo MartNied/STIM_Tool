@@ -9,6 +9,7 @@ import os
 import cv2
 import numpy as np
 from PhotoViewer import PhotoViewer
+from ImageFunctions import contrast_cut, cc_filter_idx
 
 
 class LoadQt(QMainWindow):

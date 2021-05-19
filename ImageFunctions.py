@@ -33,7 +33,7 @@ def contrast_cut(im, clip_val, dataType="uint8"):
 
 
 
-def cc_filter_idx(output_cc, min_area=5, max_area=520*696, min_eccentricity=0, max_eccentricity=1, min_solidity=0, max_solidity=1, filter_area=True, filter_eccentricity=False, filter_solidity=False):
+def cc_filter_idx(output_cc, min_area=5, max_area=520*696, min_eccentricity=0.0, max_eccentricity=1.0, min_solidity=0.0, max_solidity=1.0, min_extent=0.0, max_extent=1.0, filter_area=True, filter_eccentricity=False, filter_solidity=False, filter_extent=False):
     
     n_labels = output_cc[0]  #conneceted components analysis output
     labels = output_cc[1]
@@ -52,7 +52,8 @@ def cc_filter_idx(output_cc, min_area=5, max_area=520*696, min_eccentricity=0, m
     if filter_solidity:
         filt_idx = cc_filter_solidity(labels, filt_idx, min_solidity=min_solidity, max_solidity=max_solidity)
     
-    
+    if filter_extent:
+        filt_idx = cc_filter_extent(labels, filt_idx, min_extent=min_extent, max_extent=max_extent)
     
     ##remove background
 
@@ -125,17 +126,50 @@ def cc_filter_solidity(labels, filt_idx, min_solidity=0, max_solidity=1):
         area = cv2.contourArea(contour[0])
         hull = cv2.convexHull(contour[0])
         hull_area = cv2.contourArea(hull)
-        
-        solidity[count] = float(area)/hull_area
+
+        if np.logical_or(area == 0, hull_area == 0): #avoid division by zero error
+            solidity[count] = 1.0
+        else:
+            solidity[count] = float(area)/hull_area
         
         count += 1
 
+   
     filt_idx_solidity = np.where(np.logical_and(solidity >= min_solidity, solidity <= max_solidity))[0]      #calculate indeces of filt_idx array!, where CC-solidity lies in the intervall [min_sol, max_sol]
     
     filt_idx = apply_filt_idx_stat(filt_idx, filt_idx_solidity)  # Store the labels (indices) where solidity conditions are fullfilled !!
     
     return filt_idx
     
+def cc_filter_extent(labels, filt_idx, min_extent=0, max_extent=1):
+    
+    extent = np.zeros(filt_idx.size)  #array for storing solidity
+    
+    count = 0               #counter for indexing
+    
+    for i in filt_idx:      #iterate over filt idx element!
+        
+        struct_mask = ((labels == i)*255).astype("uint8")   #create uint8 binary image mask for connected component with label (index) i        
+        
+        contour,_ = cv2.findContours(struct_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)     #calculate outer contours of struct mask
+        
+        ## calculate contour and calculate extent
+        area = cv2.contourArea(contour[0])
+        _,_,w,h = cv2.boundingRect(contour[0])
+        rect_area = w*h
+
+        if np.logical_or(area == 0, rect_area == 0): #avoid division by zero error
+            extent[count] = 1.0
+        else:
+            extent[count] = float(area)/rect_area
+        count += 1
+
+   
+    filt_idx_extent = np.where(np.logical_and(extent >= min_extent, extent <= max_extent))[0]      #calculate indeces of filt_idx array!, where CC-solidity lies in the intervall [min_sol, max_sol]
+    
+    filt_idx = apply_filt_idx_stat(filt_idx, filt_idx_extent)  # Store the labels (indices) where solidity conditions are fullfilled !!
+    
+    return filt_idx
 
 
 ##### Helper fuctions #####
@@ -150,97 +184,4 @@ def apply_filt_idx_stat(filt_idx, filt_idx_stat):
     else: 
         return filt_idx[filt_idx_stat]  #else return filtered index array
 
-
-#####################################       Main code       ###########################
-
-#Import
-
-root = Path(".")
-filePath = root.absolute() / "test_data" / "resting1.tif" 
-filePath = str(filePath)
-im = cv2.imread(filePath, cv2.IMREAD_UNCHANGED)
-
-#Preprocessing
-
-# clip_val = int(im.max())
-clip_val = 3000
-im_clip_norm = contrast_cut(im, clip_val, dataType="uint16")
-disp_image = cv2.convertScaleAbs(im_clip_norm, alpha=(2**8 / 2**16))
-
-#Processing
-
-_, im_th = cv2.threshold(disp_image, 140, 255, cv2.THRESH_BINARY, None)
-output = cv2.connectedComponentsWithStats(im_th, connectivity=4)
-
-filt_idx = cc_filter_idx(output, min_area=10, max_area=np.prod(im.shape), min_eccentricity=0.0, max_eccentricity=0.95, filter_area=True, filter_eccentricity=False)
-
-### set labels which are not contained in filt_idx to zero
-
-labels = output[1]
-stats = output[2]
-
-# labels_filt = np.copy(labels)
-
-labels_filt = np.zeros_like(labels)
-
-for i in filt_idx:
-   labels_filt[labels == i] = 1     #set everything to backgroud which is not containted in filt_idx 
-
-
-#display results
-
-mask = ((labels != 0)*255).astype("uint8")
-mask_filt = ((labels_filt != 0)*255).astype("uint8")
-
-
-cv2.imshow("RaW Mask", mask)
-cv2.imshow("filtered Mask", mask_filt)
-
-k = cv2.waitKey(0)
-
-print(0)
-
-
-
-### calc and fit contours
-# struct_bin = ((labels == 168)*255).astype("uint8") ##168 was a big one
-# contours,_ = cv2.findContours(struct_bin, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-# cnt = contours[0]
-
-#Copy with RGB channel
-
-# result = cv2.cvtColor(struct_bin, cv2.COLOR_GRAY2RGB)
-
-### calc min enclosing rect
-# rect = cv2.minAreaRect(cnt)
-# box = cv2.boxPoints(rect)
-# box = np.int0(box)
-# cv2.drawContours(result,[box],0,(0,0,255),2)
-
-### bounding rect
-
-# x,y,w,h = cv2.boundingRect(cnt)
-# cv2.rectangle(result, (x,y), (x+w, y+h), (100, 100, 255), 2)
-
-### min enclosing circle
-
-# (x,y),radius = cv2.minEnclosingCircle(cnt)
-# center = (int(x),int(y))
-# radius = int(radius)
-# cv2.circle(result ,center, radius,(0,255,0),2)
-
-
-### Ellipse 
-# ellipse = cv2.fitEllipse(cnt)
-# cv2.ellipse(result ,ellipse,(0,255,0),2)
-
-
-#display image
-
-# k = cv2.waitKey(0)
-
-
-#Saving images
-
-# cv2.imwrite("test_data/test_file.png", disp_image, [cv2.IMWRITE_PNG_COMPRESSION, 0])
 
