@@ -1,1 +1,1 @@
- nLabels, _ = cv2.connectedComponents(self.structMaskFilt, labels=None, connectivity=8)
+

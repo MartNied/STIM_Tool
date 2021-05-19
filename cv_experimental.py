@@ -2,12 +2,7 @@ import cv2
 import numpy as np
 from pathlib import Path
 
-from numpy.core.fromnumeric import clip
-
-
 ############ function implementations ####################### 
-
-
 def contrast_cut(im, clip_val, dataType="uint8"):
     """Clipping contrast values at certain threshold value
         im - input image
@@ -38,18 +33,48 @@ def contrast_cut(im, clip_val, dataType="uint8"):
 
 
 
-def cc_filter_idx(output_cc, min_area=5, max_area=520*696, min_eccentricity=0, max_eccentricity=1):
+def cc_filter_idx(output_cc, min_area=5, max_area=520*696, min_eccentricity=0, max_eccentricity=1, min_solidity=0, max_solidity=1, filter_area=True, filter_eccentricity=False, filter_solidity=False):
     
+    n_labels = output_cc[0]  #conneceted components analysis output
     labels = output_cc[1]
     stats = output_cc[2]
     
-    filt_idx = np.where(np.logical_and(stats[:, cv2.CC_STAT_AREA] >= min_area, stats[:, cv2.CC_STAT_AREA] <= max_area))[0]  #calculate index where CC-Area lies in the intervall [min_area, max_area] --> idx is label
-    
-    if filt_idx[0] == 0:     #remove 0 label (Background)
-        filt_idx = filt_idx[1:filt_idx.size]   
-    
+    filt_idx = np.arange(0, n_labels) #create filt idx array
 
-    eccentricity = np.zeros(filt_idx.size)  #array for storing bool of the eccentricity condition (see later)
+    ##apply filters
+
+    if filter_area:
+        filt_idx = cc_filter_area(stats, filt_idx, min_area=min_area, max_area=max_area)
+
+    if filter_eccentricity:
+        filt_idx = cc_filter_eccentricity(labels, filt_idx, min_eccentricity=min_eccentricity, max_eccentricity=max_eccentricity)
+    
+    if filter_solidity:
+        filt_idx = cc_filter_solidity(labels, filt_idx, min_solidity=min_solidity, max_solidity=max_solidity)
+    
+    
+    
+    ##remove background
+
+    if filt_idx[0] == 0:
+        filt_idx = filt_idx[1:filt_idx.size]
+    
+    return filt_idx
+
+############ filter funtions  ############################
+
+def cc_filter_area(stats, filt_idx, min_area=5, max_area=520*696):
+
+    filt_idx_area = np.where(np.logical_and(stats[:, cv2.CC_STAT_AREA] >= min_area, stats[:, cv2.CC_STAT_AREA] <= max_area))[0]  #calculate index where CC-Area lies in the intervall [min_area, max_area] --> idx is label
+    
+    filt_idx = apply_filt_idx_stat(filt_idx, filt_idx_area)
+    
+    return filt_idx
+
+
+def cc_filter_eccentricity(labels, filt_idx, min_eccentricity=0, max_eccentricity=1):
+
+    eccentricity = np.zeros(filt_idx.size)  #array for storing eccentricity for each struct mask (see later)
     
     count = 0               #counter for indexing the eccentricity array
     
@@ -58,13 +83,13 @@ def cc_filter_idx(output_cc, min_area=5, max_area=520*696, min_eccentricity=0, m
         struct_mask = ((labels == i)*255).astype("uint8")   #create uint8 binary image mask for connected component with label (index) i        
         
         contour,_ = cv2.findContours(struct_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)     #calculate outer contours of struct mask
-
+        
         ## Fit contour and calculate eccentricity
 
         ellipse = cv2.fitEllipse(contour[0])     ## Danger 5 points are requiered for fitting an ellipse !!                                                   
         a = np.max(ellipse[1])      ### store big and small (a,b) semiaxis of the ellipse
         b = np.min(ellipse[1])
-    
+
         ### Alternate form using rotated rectangle
         # rect = cv2.minAreaRect(contour[0])
         # a = np.max(rect[1])      ### store big and small (a,b) side of the rectangle
@@ -77,16 +102,54 @@ def cc_filter_idx(output_cc, min_area=5, max_area=520*696, min_eccentricity=0, m
 
         
     
-    filt_idx_eccent = np.where(np.logical_and(np.array(eccentricity) >= min_eccentricity, np.array(eccentricity) <= max_eccentricity))      #calculate indeces of filt_idx array!, where CC-Eccentricity lies in the intervall [min_eccentricity, max_eccentricity]
+    filt_idx_eccent = np.where(np.logical_and(eccentricity >= min_eccentricity, eccentricity <= max_eccentricity))[0]      #calculate indeces of filt_idx array!, where CC-Eccentricity lies in the intervall [min_eccentricity, max_eccentricity]
     
-    filt_idx = filt_idx[filt_idx_eccent]  # Store the labels where Area and Eccentricity conditions are both fullfilled !!
+    filt_idx = apply_filt_idx_stat(filt_idx, filt_idx_eccent)  # Store the labels (indices) where Eccentricity conditions are fullfilled !!
     
     return filt_idx
 
-    # def apply_cc_filter():
+
+def cc_filter_solidity(labels, filt_idx, min_solidity=0, max_solidity=1):
+    
+    solidity = np.zeros(filt_idx.size)  #array for storing solidity
+    
+    count = 0               #counter for indexing
+    
+    for i in filt_idx:      #iterate over filt idx element!
+        
+        struct_mask = ((labels == i)*255).astype("uint8")   #create uint8 binary image mask for connected component with label (index) i        
+        
+        contour,_ = cv2.findContours(struct_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)     #calculate outer contours of struct mask
+        
+        ## Fit contour and calculate eccentricity
+        area = cv2.contourArea(contour[0])
+        hull = cv2.convexHull(contour[0])
+        hull_area = cv2.contourArea(hull)
+        
+        solidity[count] = float(area)/hull_area
+        
+        count += 1
+
+    filt_idx_solidity = np.where(np.logical_and(solidity >= min_solidity, solidity <= max_solidity))[0]      #calculate indeces of filt_idx array!, where CC-solidity lies in the intervall [min_sol, max_sol]
+    
+    filt_idx = apply_filt_idx_stat(filt_idx, filt_idx_solidity)  # Store the labels (indices) where solidity conditions are fullfilled !!
+    
+    return filt_idx
+    
 
 
-    #     pass
+##### Helper fuctions #####
+
+
+def apply_filt_idx_stat(filt_idx, filt_idx_stat):
+
+    if np.logical_or(filt_idx.size == 0, filt_idx_stat.size == 0): ## if index or filter array is empty return unfiltered array
+        
+        return filt_idx
+     
+    else: 
+        return filt_idx[filt_idx_stat]  #else return filtered index array
+
 
 #####################################       Main code       ###########################
 
@@ -96,7 +159,6 @@ root = Path(".")
 filePath = root.absolute() / "test_data" / "resting1.tif" 
 filePath = str(filePath)
 im = cv2.imread(filePath, cv2.IMREAD_UNCHANGED)
-
 
 #Preprocessing
 
@@ -110,7 +172,7 @@ disp_image = cv2.convertScaleAbs(im_clip_norm, alpha=(2**8 / 2**16))
 _, im_th = cv2.threshold(disp_image, 140, 255, cv2.THRESH_BINARY, None)
 output = cv2.connectedComponentsWithStats(im_th, connectivity=4)
 
-filt_idx = cc_filter_idx(output, min_area=5, max_area=np.prod(im.shape), min_eccentricity=0, max_eccentricity=0.9)
+filt_idx = cc_filter_idx(output, min_area=10, max_area=np.prod(im.shape), min_eccentricity=0.0, max_eccentricity=0.95, filter_area=True, filter_eccentricity=False)
 
 ### set labels which are not contained in filt_idx to zero
 
@@ -122,7 +184,7 @@ stats = output[2]
 labels_filt = np.zeros_like(labels)
 
 for i in filt_idx:
-    labels_filt[labels == i] = 1     #set everything to backgroud which is not containted in filt_idx 
+   labels_filt[labels == i] = 1     #set everything to backgroud which is not containted in filt_idx 
 
 
 #display results
@@ -136,8 +198,7 @@ cv2.imshow("filtered Mask", mask_filt)
 
 k = cv2.waitKey(0)
 
-
-
+print(0)
 
 
 
@@ -183,4 +244,3 @@ k = cv2.waitKey(0)
 
 # cv2.imwrite("test_data/test_file.png", disp_image, [cv2.IMWRITE_PNG_COMPRESSION, 0])
 
-print(0)
