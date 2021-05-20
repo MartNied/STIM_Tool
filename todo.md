@@ -9,9 +9,10 @@
 	(done) implement certain criteria for filtering the structures (case activated and case resting) 
 	(done) implement evaluation of parameters (case activated and case resting) 
 
-3) User Interface: 
+3) User Interface:
+	- Basic Layout
 	- Visual Feedback of counted structures
-	- ROI Selecter: Cut tool: Use Input image Select ROI Perform processing
+	- ROI Selector: Use Input image Select ROI Perform processing
 	- User interaction: Remove marked structures
 	- User interaction: cut connected structures
 	- Session View: Load multiple images and store the session in a csv file

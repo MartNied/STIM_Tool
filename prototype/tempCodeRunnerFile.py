@@ -1,0 +1,1 @@
+valueChanged.connect(self.contrastStretch)

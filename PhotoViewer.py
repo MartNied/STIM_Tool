@@ -35,7 +35,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 self.scale(factor, factor)
             self._zoom = 0
 
-    def setPhoto(self, pixmap=None):
+    def setPhoto(self, pixmap=None, fitView=True):
         self._zoom = 0
         if pixmap and not pixmap.isNull():
             self._empty = False
@@ -45,7 +45,9 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             self._empty = True
             self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
             self._photo.setPixmap(QtGui.QPixmap())
-        self.fitInView()
+        
+        if fitView:
+            self.fitInView()
 
     def wheelEvent(self, event):
         if self.hasPhoto():
