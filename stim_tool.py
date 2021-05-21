@@ -8,6 +8,7 @@ import sys
 import os
 import cv2
 import numpy as np
+import functools
 from PhotoViewer import PhotoViewer
 from ImageFunctions import contrast_cut, cc_filter_idx
 
@@ -28,9 +29,10 @@ class LoadQt(QMainWindow):
         # create and set default settings of the app
         self.colorspace = 0  # zero means grayscale: opencv --> imread() --> grayscaleflag = 0
         self.clipval = 10000  # intensity clipvalue for the import of 16bit tiff files --> they are clippend normalized and then converted to 8bit grayscale images 
-
-        self.FiltMinArea=0
-        self.FiltMaxArea=361920
+        self.thNeighborhood = 31
+        
+        self.FiltMinArea=0  
+        self.FiltMaxArea= 900      #361920 max resolution
         self.FiltMinEccentricity=0.0
         self.FiltMaxEccentricity=1.0
         self.FiltMinSolidity=0.6
@@ -43,7 +45,7 @@ class LoadQt(QMainWindow):
         self.FiltExtent=False
         
         # create some properties
-        self.fileName = None # filename of currenty loaded Image 
+        self.fileName = "" # filename of currenty loaded Image 
         self.fileExt = None  # File extension of currently loaded image
         self.filePath = None # File Path of currently loaded image
         
@@ -63,8 +65,10 @@ class LoadQt(QMainWindow):
         self.wireActions()  # connect actions, buttons etc. and set default values
         self.wireButtons()
         self.wireSliders()
+        self.wireCheckBoxes()
+        self.wireSpinBoxes()
 
-        #Wire functions to widgets and set default values
+        #Wire functions to widgets and set default values !!!
 
     def wireActions(self):
         self.openAction.triggered.connect(self.openImage)
@@ -72,19 +76,61 @@ class LoadQt(QMainWindow):
         self.exitAction.triggered.connect(self.close)
 
     def wireButtons(self):
-        self.maskButton.clicked.connect(self.openImage)
+        self.maskButton.clicked.connect(self.doMasking)
 
     def wireSliders(self):
         self.contrastTransformSlider.valueChanged.connect(self.contrastTransform)
 
     def wireCheckBoxes(self):
-        pass
+        #set default values
+        self.areaFilterCheckBox.setChecked(self.FiltArea)
+        self.eccentFilterCheckBox.setChecked(self.FiltEccentricity)
+        self.solidityFilterCheckBox.setChecked(self.FiltSolidity)
+        self.extentFilterCheckBox.setChecked(self.FiltExtent)
+        
+        
+        #wiring checkboxes to function doCheckBox
+        self.areaFilterCheckBox.stateChanged.connect(functools.partial(self.doCheckBox, self.areaFilterCheckBox, "FiltArea"))   #functools.partial allows do combine the callback doCheckbox with input arguments. Without this trick a QAction doens't allow a callback with input arguments because None is somhow returned!!
+        self.eccentFilterCheckBox.stateChanged.connect(functools.partial(self.doCheckBox, self.eccentFilterCheckBox, "FiltEccentricity"))
+        self.solidityFilterCheckBox.stateChanged.connect(functools.partial(self.doCheckBox, self.solidityFilterCheckBox, "FiltSolidity"))
+        self.extentFilterCheckBox.stateChanged.connect(functools.partial(self.doCheckBox, self.extentFilterCheckBox, "FiltExtent"))
 
     def wireSpinBoxes(self):
-        pass
+        #set default values
 
+        self.minAreaFilterSpinBox.setValue(self.FiltMinArea)
+        self.minEccentFilterSpinBox.setValue(self.FiltMinEccentricity)
+        self.minSolidityFilterSpinBox.setValue(self.FiltMinSolidity)
+        self.minExtentFilterSpinBox.setValue(self.FiltMinExtent)
+        self.maxAreaFilterSpinBox.setValue(self.FiltMaxArea)
+        self.maxEccentFilterSpinBox.setValue(self.FiltMaxEccentricity)
+        self.maxSolidityFilterSpinBox.setValue(self.FiltMaxSolidity)
+        self.maxExtentFilterSpinBox.setValue(self.FiltMaxExtent)
+
+        #Wiring Spin Boxes to function doSpinBox
+        self.minAreaFilterSpinBox.valueChanged.connect(functools.partial(self.doSpinBox, self.minAreaFilterSpinBox, "FiltMinArea"))
+        self.minEccentFilterSpinBox.valueChanged.connect(functools.partial(self.doSpinBox, self.minEccentFilterSpinBox, "FiltMinEccentricity"))
+        self.minSolidityFilterSpinBox.valueChanged.connect(functools.partial(self.doSpinBox, self.minSolidityFilterSpinBox, "FiltMinSolidity"))
+        self.minExtentFilterSpinBox.valueChanged.connect(functools.partial(self.doSpinBox, self.minExtentFilterSpinBox, "FiltMinExtent"))
+        self.maxAreaFilterSpinBox.valueChanged.connect(functools.partial(self.doSpinBox, self.maxAreaFilterSpinBox,"FiltMaxArea"))
+        self.maxEccentFilterSpinBox.valueChanged.connect(functools.partial(self.doSpinBox, self.maxEccentFilterSpinBox, "FiltMaxEccentricity"))
+        self.maxSolidityFilterSpinBox.valueChanged.connect(functools.partial(self.doSpinBox, self.maxSolidityFilterSpinBox, "FiltMaxSolidity"))
+        self.maxExtentFilterSpinBox.valueChanged.connect(functools.partial(self.doSpinBox, self.maxExtentFilterSpinBox, "FiltMaxExtent"))
     
-    ##################  Create Methods ########################
+    ################################################  Create Methods #############################################################
+
+    def doCheckBox(self, CBox, AttributeName):
+        """Checking the state of a given Check Box and changing the corresponding Attribute (must be bool). Changes self.AttributeName to (True or False)"""
+        if CBox.isChecked():
+            setattr(self, AttributeName, True)
+        else:
+            setattr(self, AttributeName, False)
+
+    def doSpinBox(self, SBox, AttributeName):
+        """Checking state of given Spin Box and changing the corresponding Attribute (can be float)"""
+        val = SBox.value()  #Get value of currently changed Spin box
+        setattr(self, AttributeName, val) #set attribute to value of current spinBox
+
 
     def openImage(self):
         """Creates file dialog and sets the imported image as pixmap in in the image display label """
@@ -192,12 +238,9 @@ class LoadQt(QMainWindow):
             self.contrastTransformSlider.value()) + "        Struct count: " + str(self.nStructs))
         
 
-    # def structTh(self):
-    #     self.contrastStretch()
-    #     nbh = 31
-    #     self.structMask = cv2.adaptiveThreshold(
-    #         self.processData, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, nbh, 0)
-        
+    def doMasking(self): ###no filter applied yet
+        self.imageDataProcess = cv2.adaptiveThreshold(self.imageDataProcess, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, self.thNeighborhood, 0)
+        self.displayImage(self.imageDataProcess, display="process", fitView=False)
 
 
     # def structCount(self):

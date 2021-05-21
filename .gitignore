@@ -1,5 +1,6 @@
 # Certain Folders and files
 test_data/
+tempCodeRunnerFile.py
 
 # VSCode
 .vscode/*
@@ -176,17 +177,4 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-This is it, a simple Gitignore template to add to your repository. You can get the template on Github.
-Enjoyed This Post?
-jean-christophe chouinard seo expert in quebec city
-Jean-Christophe Chouinard
 
-Sr SEO Specialist at Seek (Melbourne, Australia). Specialized in technical SEO. In a quest to programmatic SEO for large organizations through the use of Python, R and machine learning.
-You Might Also Like  Learn Git and Github (Complete Guide)
-
-Navigation de l’article
-Previous Post
-How to Extract Verified Properties using Google Search Console API and Python
-Next Post
-Facebook Graph API: Get Access Token
-© 2021 JC Chouinard
