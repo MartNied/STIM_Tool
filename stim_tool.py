@@ -22,14 +22,19 @@ class LoadQt(QMainWindow):
         self.viewerFeedback = PhotoViewer(self)     #constructor of photoviewer widget
         self.viewerProcess = PhotoViewer(self)                                              
                     
-        self.imageDisplayLayout.insertWidget(0, self.viewerFeedback) #place Feedback viewer on left position in imageDisplayLayout
-        self.imageDisplayLayout.insertWidget(1, self.viewerProcess)  #place Feedback viewer on right position in imageDisplayLayout   
+        self.displayLayout.insertWidget(0, self.viewerFeedback) #place Feedback viewer on left position in imageDisplayLayout
+        self.displayLayout.insertWidget(1, self.viewerProcess)  #place Feedback viewer on right position in imageDisplayLayout   
         
+        self.placeholder1.hide()      #hide GraphicsView Place holders!
+        self.placeholder2.hide()
+        
+        self.displayLayout.update()
         
         # create and set default settings of the app
         self.colorspace = 0  # zero means grayscale: opencv --> imread() --> grayscaleflag = 0
         self.clipval = 10000  # intensity clipvalue for the import of 16bit tiff files --> they are clippend normalized and then converted to 8bit grayscale images 
-        self.thNeighborhood = 31
+        self.thNeighborhood = 31 # Gaussian Kernel Size for adaptive thresholding in masking process
+        self.connecitvity = 4   # Connected components connecitvity
         
         self.FiltMinArea=0  
         self.FiltMaxArea= 900      #361920 max resolution
@@ -58,6 +63,8 @@ class LoadQt(QMainWindow):
         self.imageDataRaw = None  #Data of image file which is currently loaded (if tiff --> normalization and conversion too 8 bit grayscale)
         self.imageDataFeedback = None  #Data of image on the left positioned feedback viewer 
         self.imageDataProcess = None #Data of image on the right positioned processing viewer
+        self.labelData = None  #Label Matrix for corresponding mask Data 
+        self.maskData = None # Mask Data from Threhsolding and filtering
         
         self.nStructs = "--" # number of counted structs
         
@@ -79,7 +86,8 @@ class LoadQt(QMainWindow):
         self.maskButton.clicked.connect(self.doMasking)
 
     def wireSliders(self):
-        self.contrastTransformSlider.valueChanged.connect(self.contrastTransform)
+        self.contrastTransformSlider_1.valueChanged.connect(self.contrastTransform)
+        self.contrastTransformSlider_2.valueChanged.connect(self.contrastTransform)
 
     def wireCheckBoxes(self):
         #set default values
@@ -165,7 +173,15 @@ class LoadQt(QMainWindow):
             self.imageDataProcess = np.copy(self.imageDataRaw)
             self.imageDataFeedback = np.copy(self.imageDataRaw)
 
-            self.contrastTransformSlider.setValue(0)
+            
+            ##set slider and buttons enables status
+            
+            self.contrastTransformSlider_1.setValue(255)
+            self.contrastTransformSlider_2.setValue(0)
+
+            self.contrastTransformSlider_1.setEnabled(True)
+            self.contrastTransformSlider_2.setEnabled(True)
+            self.doMeasurementButton.setEnabled(False)
 
             self.fileName = os.path.basename(filePath) #create filename from path
             self.displayImage(self.imageDataRaw, display="both") #display raw data on both viewers
@@ -228,19 +244,46 @@ class LoadQt(QMainWindow):
                 
             return
 
-        lower_contrast_val = self.contrastTransformSlider.value()
+        upper_contrast_val = self.contrastTransformSlider_1.value()
+        lower_contrast_val = self.contrastTransformSlider_2.value()
+
+        cv2.intensity_transform.contrastStretching(self.imageDataRaw, self.imageDataProcess, lower_contrast_val, 0, upper_contrast_val, 255)
         
-        cv2.intensity_transform.contrastStretching(self.imageDataRaw, self.imageDataProcess, lower_contrast_val, 0, 255, 255)
-        
-        self.displayImage(self.imageDataProcess, display="process", fitView=False)
+        self.displayImage(self.imageDataProcess, display="both", fitView=False)
         
         self.bottomLabel.setText("File: " + self.fileName + "       Lower Intensity Bound: " + str(
-            self.contrastTransformSlider.value()) + "        Struct count: " + str(self.nStructs))
+            self.contrastTransformSlider_1.value()) + "        Struct count: " + str(self.nStructs))
         
 
     def doMasking(self): ###no filter applied yet
-        self.imageDataProcess = cv2.adaptiveThreshold(self.imageDataProcess, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, self.thNeighborhood, 0)
-        self.displayImage(self.imageDataProcess, display="process", fitView=False)
+        if np.all(self.imageDataProcess == None):  # check if image was loaded
+            QMessageBox.information(
+                self, "Error processing Image", "No image was loaded!")
+            
+            return
+
+        self.maskData = cv2.adaptiveThreshold(self.imageDataProcess, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, self.thNeighborhood, 0) #set process Data to raw mask
+        
+        output_cc = cv2.connectedComponentsWithStats(self.maskData, connectivity=self.connecitvity) # calcualte connected components of thresholded image
+        
+        self.labelData = output_cc[1]  #set label data to unfiltred label Matrix
+        
+        if np.any([self.FiltArea, self.FiltEccentricity, self.FiltSolidity, self.FiltExtent]):      # if any Filter is enabled apply filter functions
+            
+            filt_idx = cc_filter_idx(output_cc, min_area=self.FiltMinArea, max_area=self.FiltMaxArea, min_eccentricity=self.FiltMinEccentricity, max_eccentricity=self.FiltMaxEccentricity, min_solidity=self.FiltMinSolidity, max_solidity=self.FiltMaxSolidity, min_extent=self.FiltMinExtent, max_extent=self.FiltMaxExtent, filter_area=self.FiltArea, filter_eccentricity=self.FiltEccentricity, filter_solidity=self.FiltSolidity, filter_extent=self.FiltExtent)  #calculate labels where Filter conditions are fullfilled!
+            
+
+            filt_labels = np.zeros_like(self.labelData)  #created empty filtered label array
+            
+            for i in filt_idx:  #iterate over all filter indices
+                filt_labels[self.labelData == i] = i  #fill empty label array with filtered labels (0 is Background label)
+
+            filt_mask = ((filt_labels != 0)*255).astype("uint8") #calculate binary mask from filtered labels
+        
+            self.maskData = filt_mask #set image data to filtered Mask
+            self.labelData = filt_labels    #set label Data to filtered label Matrix
+        
+        self.displayImage(self.maskData, display="process", fitView=False) #display image on process side
 
 
     # def structCount(self):
