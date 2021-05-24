@@ -10,6 +10,8 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self._scene = QtWidgets.QGraphicsScene(self)
         self._photo = QtWidgets.QGraphicsPixmapItem()
         self._scene.addItem(self._photo)
+        self._tool = "drag" #for accessing different tools from outside, should act like a switch for different mouse handler events (see mousePressEvent, mouseReleaseEvent)
+        
         self.setScene(self._scene)
         self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
         self.setResizeAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
@@ -70,35 +72,15 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         elif not self._photo.pixmap().isNull():
             self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event):  #defines the mouse press event if the scene is clicked
+        
         if self._photo.isUnderMouse():
-            self.photoClicked.emit(self.mapToScene(event.pos()).toPoint())
-        super(PhotoViewer, self).mousePressEvent(event)
+            if self._tool == "drag":    
+                self.photoClicked.emit(self.mapToScene(event.pos()).toPoint())
+                print("i am in drag mode")
+            else:
+                print("I am in another mode")
 
-
-class Window(QtWidgets.QWidget):
-    def __init__(self):
-        super(Window, self).__init__()
-        self.viewer = PhotoViewer(self)
-        # 'Load image' button
-        self.btnLoad = QtWidgets.QToolButton(self)
-        self.btnLoad.setText('Load image')
-        self.btnLoad.clicked.connect(self.loadImage)
-        # Button to change from drag/pan to getting pixel info
-        self.btnPixInfo = QtWidgets.QToolButton(self)
-        self.btnPixInfo.setText('Enter pixel info mode')
-        self.btnPixInfo.clicked.connect(self.pixInfo)
-        self.editPixInfo = QtWidgets.QLineEdit(self)
-        self.editPixInfo.setReadOnly(True)
-        self.viewer.photoClicked.connect(self.photoClicked)
-        # Arrange layout
-        VBlayout = QtWidgets.QVBoxLayout(self)
-        VBlayout.addWidget(self.viewer)
-        HBlayout = QtWidgets.QHBoxLayout()
-        HBlayout.setAlignment(QtCore.Qt.AlignLeft)
-        HBlayout.addWidget(self.btnLoad)
-        HBlayout.addWidget(self.btnPixInfo)
-        HBlayout.addWidget(self.editPixInfo)
-        VBlayout.addLayout(HBlayout)
+        super(PhotoViewer, self).mousePressEvent(event) # ad mousePressEvent to modified GraphicsView class (Photoviewer)
 
     
