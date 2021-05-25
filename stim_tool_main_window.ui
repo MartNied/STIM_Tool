@@ -524,7 +524,29 @@
        </widget>
       </item>
       <item>
+       <widget class="QGroupBox" name="roiGroupBox">
+        <property name="title">
+         <string>ROI</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="QPushButton" name="saveRoiButton">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="text">
+            <string>Save ROI</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
        <widget class="QGroupBox" name="contrastTransormGroupbox">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="title">
          <string>Contrast Transfrom</string>
         </property>
@@ -656,7 +678,6 @@
      <string>File</string>
     </property>
     <addaction name="openAction"/>
-    <addaction name="saveAction"/>
     <addaction name="separator"/>
     <addaction name="exitAction"/>
    </widget>
@@ -685,7 +706,7 @@
     <enum>LeftToolBarArea</enum>
    </attribute>
    <attribute name="toolBarBreak">
-    <bool>true</bool>
+    <bool>false</bool>
    </attribute>
    <addaction name="dragAction"/>
    <addaction name="roiAction"/>
@@ -701,14 +722,6 @@
    </property>
    <property name="shortcut">
     <string extracomment="Ctrl+O">Ctrl+O</string>
-   </property>
-  </action>
-  <action name="saveAction">
-   <property name="text">
-    <string>Save View</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+S</string>
    </property>
   </action>
   <action name="exitAction">
@@ -830,12 +843,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>79</x>
-     <y>554</y>
+     <x>128</x>
+     <y>530</y>
     </hint>
     <hint type="destinationlabel">
-     <x>170</x>
-     <y>554</y>
+     <x>199</x>
+     <y>530</y>
     </hint>
    </hints>
   </connection>
@@ -846,12 +859,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>63</x>
-     <y>554</y>
+     <x>112</x>
+     <y>530</y>
     </hint>
     <hint type="destinationlabel">
-     <x>237</x>
-     <y>554</y>
+     <x>266</x>
+     <y>530</y>
     </hint>
    </hints>
   </connection>
@@ -862,12 +875,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>87</x>
-     <y>604</y>
+     <x>132</x>
+     <y>555</y>
     </hint>
     <hint type="destinationlabel">
-     <x>170</x>
-     <y>604</y>
+     <x>199</x>
+     <y>555</y>
     </hint>
    </hints>
   </connection>
@@ -878,12 +891,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>74</x>
-     <y>604</y>
+     <x>123</x>
+     <y>555</y>
     </hint>
     <hint type="destinationlabel">
-     <x>237</x>
-     <y>604</y>
+     <x>266</x>
+     <y>555</y>
     </hint>
    </hints>
   </connection>
@@ -894,12 +907,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>82</x>
-     <y>654</y>
+     <x>131</x>
+     <y>580</y>
     </hint>
     <hint type="destinationlabel">
-     <x>170</x>
-     <y>654</y>
+     <x>199</x>
+     <y>580</y>
     </hint>
    </hints>
   </connection>
@@ -910,12 +923,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>53</x>
-     <y>654</y>
+     <x>102</x>
+     <y>580</y>
     </hint>
     <hint type="destinationlabel">
-     <x>237</x>
-     <y>654</y>
+     <x>266</x>
+     <y>580</y>
     </hint>
    </hints>
   </connection>
@@ -926,8 +939,8 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>413</x>
-     <y>473</y>
+     <x>403</x>
+     <y>496</y>
     </hint>
     <hint type="destinationlabel">
      <x>972</x>
@@ -942,8 +955,8 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>413</x>
-     <y>542</y>
+     <x>403</x>
+     <y>534</y>
     </hint>
     <hint type="destinationlabel">
      <x>972</x>
@@ -958,12 +971,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>338</x>
-     <y>462</y>
+     <x>403</x>
+     <y>496</y>
     </hint>
     <hint type="destinationlabel">
-     <x>706</x>
-     <y>578</y>
+     <x>1127</x>
+     <y>559</y>
     </hint>
    </hints>
   </connection>
@@ -978,8 +991,8 @@
      <y>531</y>
     </hint>
     <hint type="destinationlabel">
-     <x>706</x>
-     <y>578</y>
+     <x>1127</x>
+     <y>559</y>
     </hint>
    </hints>
   </connection>
@@ -990,12 +1003,12 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>315</x>
-     <y>466</y>
+     <x>403</x>
+     <y>496</y>
     </hint>
     <hint type="destinationlabel">
-     <x>324</x>
-     <y>600</y>
+     <x>403</x>
+     <y>572</y>
     </hint>
    </hints>
   </connection>
@@ -1010,8 +1023,72 @@
      <y>529</y>
     </hint>
     <hint type="destinationlabel">
-     <x>299</x>
-     <y>602</y>
+     <x>403</x>
+     <y>572</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>roiAction</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>saveRoiButton</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>458</x>
+     <y>524</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>roiAction</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>FilterGroupBox</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>517</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>roiAction</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>MaskGroupBox</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>343</x>
+     <y>517</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>roiAction</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>contrastTransormGroupbox</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>837</x>
+     <y>517</y>
     </hint>
    </hints>
   </connection>

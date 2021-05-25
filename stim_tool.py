@@ -40,7 +40,7 @@ class LoadQt(QMainWindow):
         self.colorspace = 0  # zero means grayscale: opencv --> imread() --> grayscaleflag = 0
         self.clipval = 10000  # intensity clipvalue for the import of 16bit tiff files --> they are clippend normalized and then converted to 8bit grayscale images 
         self.thNeighborhood = 31 # Gaussian Kernel Size for adaptive thresholding in masking process
-        self.connectivity = 8   # Connected components connectivity
+        self.connectivity = 4   # Connected components connectivity
         self.alphaBlend = 0.3 # alpha value for blending mask over process images (see doVisualFeedback function)
         
         self.FiltMinArea=5  
@@ -73,7 +73,7 @@ class LoadQt(QMainWindow):
         self.imageDataProcess = None #Data of image on the right positioned processing viewer
         self.labelData = None  #Label Matrix for corresponding mask Data 
         self.maskData = None # Mask Data from Threhsolding and filtering
-        
+        self.roiData = None # Data from Roi: Selected from image Data raw
         self.nStructs = "--" # number of counted structs
         
 
@@ -82,12 +82,15 @@ class LoadQt(QMainWindow):
         self.wireSliders()
         self.wireCheckBoxes()
         self.wireSpinBoxes()
+        self.wireViewers()
+
+        #display bottom label
+        self.setBottomLabel()
 
         #Wire functions to widgets and set default values !!!
 
     def wireActions(self):
         self.openAction.triggered.connect(self.openImage)
-        self.saveAction.triggered.connect(self.saveImage)
         self.exitAction.triggered.connect(self.close)
 
         self.dragAction.triggered.connect(functools.partial(self.toolSelector, "drag"))
@@ -98,6 +101,7 @@ class LoadQt(QMainWindow):
     def wireButtons(self):
         self.maskButton.clicked.connect(self.doMasking)
         self.undoMaskButton.clicked.connect(self.undoMasking)
+        self.saveRoiButton.clicked.connect(functools.partial(self.saveImage, datafrom="roiData"))
 
     def wireSliders(self):
         self.contrastTransformSlider_1.valueChanged.connect(self.contrastTransform)
@@ -139,6 +143,13 @@ class LoadQt(QMainWindow):
         self.maxSolidityFilterSpinBox.valueChanged.connect(functools.partial(self.doSpinBox, self.maxSolidityFilterSpinBox, "FiltMaxSolidity"))
         self.maxExtentFilterSpinBox.valueChanged.connect(functools.partial(self.doSpinBox, self.maxExtentFilterSpinBox, "FiltMaxExtent"))
     
+    def wireViewers(self):
+        self.viewerFeedback.photoClicked.connect(self.viewerSlotClicked)
+        self.viewerProcess.photoClicked.connect(self.viewerSlotClicked)
+
+        self.viewerFeedback.photoClickedReleased.connect(self.viewerSlotClickedReleased)
+        self.viewerProcess.photoClickedReleased.connect(self.viewerSlotClickedReleased)
+        
     ################################################  Create Methods #############################################################
 
     def doCheckBox(self, CBox, AttributeName):
@@ -237,10 +248,14 @@ class LoadQt(QMainWindow):
             self.pixmapProcess = QPixmap.fromImage(image)
             self.viewerProcess.setPhoto(self.pixmapProcess, fitView=fitView)
         
+        self.viewerProcess.toggleDragMode() #toggle corrrect drag mode: set photo alway changed it needs to be refined when there is time for that
+        self.viewerFeedback.toggleDragMode() 
 
-    def saveImage(self):
-        """ Opens File Dialog and writes the current image Data to an uncompressed png-File """
-        if np.all(self.imageData == None):  # basically same procedure as openImage
+    def saveImage(self,  datafrom="roiData"):
+        """ Opens File Dialog and writes the current data to an uncompressed png-File """
+        data = getattr(self, datafrom)
+
+        if np.all(data == None):  # basically same procedure as openImage
             QMessageBox.information(
                 self, "Error Saving Image", "No image was loaded!")
         else:
@@ -250,7 +265,7 @@ class LoadQt(QMainWindow):
                 return
             else:
                 try:
-                    cv2.imwrite(filePath, self.imageData, [  # write imageData to uncompressed .png File
+                    cv2.imwrite(filePath, data, [  # write imageData to uncompressed .png File
                         cv2.IMWRITE_PNG_COMPRESSION, 0])
                 except:
                     QMessageBox.information(
@@ -337,16 +352,22 @@ class LoadQt(QMainWindow):
     
     def setBottomLabel(self):
         "creates a string which is displayed in the bottom laybel for user information"
-        dispStr = " File: " + self.fileName + "       Lower Th: " + str(self.contrastTransformSlider_2.value()) + "       Upper Th: " + str(self.contrastTransformSlider_1.value()) + "        Struct count: " + str(self.nStructs)
+        dispStr = " File: " + self.fileName + "       Lower Th: " + str(self.contrastTransformSlider_2.value()) + "       Upper Th: " + str(self.contrastTransformSlider_1.value()) + "        Struct count: " + str(self.nStructs) + "        Interaction Mode: " + self.activeTool
         self.bottomLabel.setText(dispStr)
 
     def toolSelector(self, selected_tool="drag"):
-        
-        self.activeTool = selected_tool
-        self.viewerFeedback._tool=selected_tool
-        self.viewerProcess._tool=selected_tool
+        """sets tool attribute of Photoviewer so that the correct tool from the Toolbar is selected"""
+        self.activeTool = selected_tool #set attribute for current tool (drag, roi, cut, erase)
 
-        if selected_tool == "drag":
+        self.setBottomLabel()  #set bottom label to correct tool which is currently selected
+        
+        self.viewerFeedback._tool=selected_tool #set correct drag mode of Feedback Viewer
+        self.viewerProcess._tool=selected_tool  #set correct drag mode of Process Viewer
+
+        self.viewerFeedback.toggleDragMode()    #toogle drag mode of image viewers 
+        self.viewerProcess.toggleDragMode()
+
+        if selected_tool == "drag":             #set correct check state for each button in toolbar 
             self.dragAction.setChecked(True)
             self.roiAction.setChecked(False)
             self.cutAction.setChecked(False)
@@ -369,6 +390,57 @@ class LoadQt(QMainWindow):
             self.roiAction.setChecked(False)
             self.cutAction.setChecked(False)
             self.eraseAction.setChecked(True)
+    
+    def viewerSlotClicked(self, press_point):
+        """recieves mouse press coordinate from the currently clicked viewer. This slot is for tools which just need 1 click"""
+        if self.activeTool == "drag":           
+            pass
+
+        elif self.activeTool == "erase":
+            pass
+        
+    def viewerSlotClickedReleased(self, press_point, release_point):
+        """recieves mouse press and release coordinate from the currently clicked viewer. This slot is for tools which need 1 click and 1 release coordinate"""
+        if self.activeTool == "roi":
+           
+            self.doRoiTool(press_point, release_point)
+            
+        elif self.activeTool == "cut":
+            pass
+    
+
+
+    def doRoiTool(self, press_point, release_point):
+        """calculate roi from rawImage data and press and release points in image Viewer"""
+        pp = np.array([press_point.x(), press_point.y()])    #save press and release QT points as numpy arrays
+        rp = np.array([release_point.x(), release_point.y()])
+       
+        #do roi calculation for different quadrants (posibilities to describe rectangle by two points) then choose indicies (pixel coordinates accordingly)
+        if np.all(rp >= pp):
+            roiData = self.imageDataRaw[pp[1]:rp[1], pp[0]:rp[0]].copy()
+           
+
+        elif np.all(rp < pp):
+            roiData = self.imageDataRaw[rp[1]:pp[1], rp[0]:pp[0]].copy()
+          
+
+        elif rp[0] < pp[0] and rp[1] >= pp[1]:
+            roiData = self.imageDataRaw[pp[1]:rp[1], rp[0]:pp[0]].copy()
+           
+
+        elif  rp[0] >= pp[0]  and rp[1] < pp[1]:
+            roiData = self.imageDataRaw[rp[1]:pp[1], pp[0]:rp[0]].copy()
+          
+
+        if np.all(roiData.shape) != 0 and len(roiData.shape) == 2: #check if roi selection has shape dimension 2 and non zero dimension 
+  
+            self.displayImage(roiData, display="process", fitView=True) #display Roi on process side
+            self.viewerProcess._modifiable=False #set viewer to not modifiable (avoiding user from using the roi tool on the process side)
+            
+            setattr(self, "roiData", roiData)  #set attribute for accessing the roi data by other routines
+
+
+
 
 
 #Launch app

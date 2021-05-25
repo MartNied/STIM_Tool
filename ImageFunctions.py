@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from pathlib import Path
+
 
 ############ function implementations ####################### 
 def contrast_cut(im, clip_val, dataType="uint8"):
@@ -87,14 +87,14 @@ def cc_filter_eccentricity(labels, filt_idx, min_eccentricity=0, max_eccentricit
         
         ## Fit contour and calculate eccentricity
 
-        ellipse = cv2.fitEllipse(contour[0])     ## Danger 5 points are requiered for fitting an ellipse !!                                                   
-        a = np.max(ellipse[1])      ### store big and small (a,b) semiaxis of the ellipse
-        b = np.min(ellipse[1])
+        #ellipse = cv2.fitEllipse(contour[0])     ## Danger 5 points are requiered for fitting an ellipse !!                                                   
+        #a = np.max(ellipse[1])      ### store big and small (a,b) semiaxis of the ellipse
+        #b = np.min(ellipse[1])
 
         ### Alternate form using rotated rectangle
-        # rect = cv2.minAreaRect(contour[0])
-        # a = np.max(rect[1])      ### store big and small (a,b) side of the rectangle
-        # b = np.min(rect[1])
+        rect = cv2.minAreaRect(contour[0])
+        a = np.max(rect[1])      ### store big and small (a,b) side of the rectangle
+        b = np.min(rect[1])
         
         assert((a >= 0) and (b >= 0))
         

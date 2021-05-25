@@ -21,8 +21,7 @@ clip_val = 5000
 im_clip_norm = contrast_cut(im, clip_val, dataType="uint16")
 disp_image = cv2.convertScaleAbs(im_clip_norm, alpha=(2**8 / 2**16))
 
-disp_image_cut = contrast_cut(disp_image, 10)
-
+disp_image_cut = disp_image[:,100:300]
 # #Processing
 
 # _, im_th = cv2.threshold(disp_image, 140, 255, cv2.THRESH_BINARY, None)
@@ -54,8 +53,8 @@ cv2.imshow("Clipped image", disp_image_cut)
 
 k = cv2.waitKey(0)
 
-cv2.imwrite("test_data/test_file_8bit.png", disp_image, [cv2.IMWRITE_PNG_COMPRESSION, 0])
-cv2.imwrite("test_data/test_file_16bit.png", im_clip_norm, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+#cv2.imwrite("test_data/test_file_8bit.png", disp_image, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+#cv2.imwrite("test_data/test_file_16bit.png", im_clip_norm, [cv2.IMWRITE_PNG_COMPRESSION, 0])
 
 print(0)
 

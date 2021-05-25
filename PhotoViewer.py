@@ -1,7 +1,9 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 class PhotoViewer(QtWidgets.QGraphicsView):
+    
     photoClicked = QtCore.pyqtSignal(QtCore.QPoint)
+    photoClickedReleased = QtCore.pyqtSignal(QtCore.QPoint, QtCore.QPoint)
 
     def __init__(self, parent):
         super(PhotoViewer, self).__init__(parent)
@@ -10,7 +12,11 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self._scene = QtWidgets.QGraphicsScene(self)
         self._photo = QtWidgets.QGraphicsPixmapItem()
         self._scene.addItem(self._photo)
-        self._tool = "drag" #for accessing different tools from outside, should act like a switch for different mouse handler events (see mousePressEvent, mouseReleaseEvent)
+        self._tool = "drag" #for accessing different tools from outside, should act like a switch for different drag behaviours
+        self._pressPoint = QtCore.QPoint(0,0) #for storing current press point
+        self._releasePoint = QtCore.QPoint(0,0) #same for release
+        self._modifiable = True
+        
         
         self.setScene(self._scene)
         self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
@@ -67,20 +73,38 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 self._zoom = 0
 
     def toggleDragMode(self):
-        if self.dragMode() == QtWidgets.QGraphicsView.ScrollHandDrag:
+        """Switching to different drag modes if different tools are selected"""
+        if  self._photo.pixmap().isNull():
+
             self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
-        elif not self._photo.pixmap().isNull():
-            self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
-
-    def mousePressEvent(self, event):  #defines the mouse press event if the scene is clicked
         
-        if self._photo.isUnderMouse():
-            if self._tool == "drag":    
-                self.photoClicked.emit(self.mapToScene(event.pos()).toPoint())
-                print("i am in drag mode")
-            else:
-                print("I am in another mode")
+        elif not self._photo.pixmap().isNull():
 
-        super(PhotoViewer, self).mousePressEvent(event) # ad mousePressEvent to modified GraphicsView class (Photoviewer)
+            if self._tool == "drag":
+                self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
+
+            elif self._tool == "roi":
+                self.setDragMode(QtWidgets.QGraphicsView.RubberBandDrag)    
+            else:
+                self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
+
 
     
+    def mousePressEvent(self, event):  #defines the mouse press event if the scene is clicked
+        if self._photo.isUnderMouse():
+            if self._modifiable:
+                self._pressPoint = self.mapToScene(event.pos()).toPoint() #store press point
+                self.photoClicked.emit(self._pressPoint) #emit signal which triggers action in main app
+            
+        super(PhotoViewer, self).mousePressEvent(event) # ad mousePressEvent to modified GraphicsView class (Photoviewer)
+
+
+
+    def mouseReleaseEvent(self, event):  #defines the mouse release event if the scene is clicked
+        if self._photo.isUnderMouse():
+            if self._modifiable:
+                self._releasePoint = self.mapToScene(event.pos()).toPoint() #store release point
+                self.photoClickedReleased.emit(self._pressPoint, self._releasePoint) #emit signal which triggers action in main app
+
+        super(PhotoViewer, self).mouseReleaseEvent(event) # ad mousePressEvent to modified GraphicsView class (Photoviewer)
+  
