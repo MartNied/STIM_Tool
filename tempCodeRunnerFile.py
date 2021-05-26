@@ -1,1 +1,2 @@
-display
+
+        self.fileBrowser.setSortingEnabled(True)

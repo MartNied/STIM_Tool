@@ -1,8 +1,9 @@
 from PyQt5 import QtCore
 from PyQt5 import QtGui, uic
-from PyQt5.QtCore import QSize, pyqtSlot, Qt
+from PyQt5 import QtWidgets
+from PyQt5.QtCore import QObject, QSize, pyqtSlot, Qt
 from PyQt5.QtGui import QImage, QPixmap, QPalette
-from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QMessageBox, QAction, QSizePolicy, QLabel, QScrollArea
+from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QMessageBox, QSizePolicy, QLabel, QScrollArea, QAction
 from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
 import sys
 import os
@@ -36,6 +37,7 @@ class LoadQt(QMainWindow):
         
         self.displayLayout.update()
         
+        
         # create and set default settings of the app
         self.colorspace = 0  # zero means grayscale: opencv --> imread() --> grayscaleflag = 0
         self.clipval = 10000  # intensity clipvalue for the import of 16bit tiff files --> they are clippend normalized and then converted to 8bit grayscale images 
@@ -60,6 +62,7 @@ class LoadQt(QMainWindow):
         self.fileName = "" # filename of currenty loaded Image 
         self.fileExt = None  # File extension of currently loaded image
         self.filePath = None # File Path of currently loaded image
+        self.folderPath = None
         self.activeTool = "drag"
         
         self.SessionFileNames = None   # Array with all filenames which are consideres for the current session
@@ -83,7 +86,7 @@ class LoadQt(QMainWindow):
         self.wireCheckBoxes()
         self.wireSpinBoxes()
         self.wireViewers()
-
+        self.wireFileBrowser() 
         #display bottom label
         self.setBottomLabel()
 
@@ -123,7 +126,6 @@ class LoadQt(QMainWindow):
 
     def wireSpinBoxes(self):
         #set default values
-
         self.minAreaFilterSpinBox.setValue(self.FiltMinArea)
         self.minEccentFilterSpinBox.setValue(self.FiltMinEccentricity)
         self.minSolidityFilterSpinBox.setValue(self.FiltMinSolidity)
@@ -149,8 +151,27 @@ class LoadQt(QMainWindow):
 
         self.viewerFeedback.photoClickedReleased.connect(self.viewerSlotClickedReleased)
         self.viewerProcess.photoClickedReleased.connect(self.viewerSlotClickedReleased)
+
+    def wireFileBrowser(self):
+        self.fileModel = QtWidgets.QFileSystemModel()
+        self.fileModel.setRootPath((QtCore.QDir.rootPath()))
+        
+        self.fileTree.setModel(self.fileModel)
+        self.fileTree.setRootIndex(self.fileModel.index(self.folderPath))
+        self.fileTree.setSortingEnabled(True)
+        self.fileTree.setColumnHidden(1, True)
+        self.fileTree.setColumnWidth(0, 250)
+
+        self.fileTree.collapsed.connect(self.test_fun)
+
+        print("wiring done!")
+        
         
     ################################################  Create Methods #############################################################
+    def test_fun(self):
+        print("Hallo")
+
+
 
     def doCheckBox(self, CBox, AttributeName):
         """Checking the state of a given Check Box and changing the corresponding Attribute (must be bool). Changes self.AttributeName to (True or False)"""
@@ -176,7 +197,10 @@ class LoadQt(QMainWindow):
         else:
             self.filePath = filePath  #set current file Path of image which is loaded
             self.fileExt = os.path.splitext(filePath)[1]        #save file extension from path
-            
+            self.folderPath = os.path.dirname(filePath)
+
+            self.fileTree.setRootIndex(self.fileModel.index(self.folderPath)) #set root path of fileSystem to folder path of currently opened image
+
             if self.colorspace == 0:  # needs to be adapated if non grayscale images are imported (0 flag for Grayscale images)
 
                 image_import = cv2.imread(filePath, cv2.IMREAD_UNCHANGED)
@@ -447,4 +471,5 @@ class LoadQt(QMainWindow):
 app = QApplication(sys.argv)
 win = LoadQt()
 win.show()
+print(0)
 sys.exit(app.exec())

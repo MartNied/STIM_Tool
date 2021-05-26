@@ -136,10 +136,19 @@
        <property name="currentIndex">
         <number>0</number>
        </property>
-       <widget class="QWidget" name="masdf">
+       <widget class="QWidget" name="fb_hor">
         <attribute name="title">
          <string>Files</string>
         </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <item>
+          <widget class="QTreeView" name="fileTree">
+           <property name="contextMenuPolicy">
+            <enum>Qt::CustomContextMenu</enum>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
        <widget class="QWidget" name="tab_2">
         <attribute name="title">
