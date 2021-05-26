@@ -143,6 +143,9 @@
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
           <widget class="QTreeView" name="fileTree">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
            <property name="contextMenuPolicy">
             <enum>Qt::CustomContextMenu</enum>
            </property>
@@ -687,6 +690,7 @@
      <string>File</string>
     </property>
     <addaction name="openAction"/>
+    <addaction name="saveRoiAction"/>
     <addaction name="separator"/>
     <addaction name="exitAction"/>
    </widget>
@@ -808,6 +812,17 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+E</string>
+   </property>
+  </action>
+  <action name="saveRoiAction">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Save Roi</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
    </property>
   </action>
  </widget>
@@ -1098,6 +1113,22 @@
     <hint type="destinationlabel">
      <x>837</x>
      <y>517</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>roiAction</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>saveRoiAction</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
     </hint>
    </hints>
   </connection>

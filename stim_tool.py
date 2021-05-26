@@ -2,7 +2,7 @@ from PyQt5 import QtCore
 from PyQt5 import QtGui, uic
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QObject, QSize, pyqtSlot, Qt
-from PyQt5.QtGui import QImage, QPixmap, QPalette
+from PyQt5.QtGui import QImage, QPixmap, QPalette, QTextCursor
 from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QMessageBox, QSizePolicy, QLabel, QScrollArea, QAction
 from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
 import sys
@@ -13,7 +13,6 @@ import functools
 from PhotoViewer import PhotoViewer
 from ImageFunctions import contrast_cut, cc_filter_idx
 
-
 class LoadQt(QMainWindow):
     def __init__(self):
         super(LoadQt, self).__init__()
@@ -21,8 +20,8 @@ class LoadQt(QMainWindow):
         
         # Create additional GUI parts
         self.viewerFeedback = PhotoViewer(self)     #constructor of photoviewer widget
-        self.viewerProcess = PhotoViewer(self)                                              
-                    
+        self.viewerProcess = PhotoViewer(self)                                                   
+        
         self.placeholder1.hide()      #hide GraphicsView Place holders!
         self.placeholder2.hide()
 
@@ -93,13 +92,13 @@ class LoadQt(QMainWindow):
         #Wire functions to widgets and set default values !!!
 
     def wireActions(self):
-        self.openAction.triggered.connect(self.openImage)
+        self.openAction.triggered.connect(functools.partial(self.openImage, "dialog"))
         self.exitAction.triggered.connect(self.close)
-
         self.dragAction.triggered.connect(functools.partial(self.toolSelector, "drag"))
         self.roiAction.triggered.connect(functools.partial(self.toolSelector, "roi"))
         self.cutAction.triggered.connect(functools.partial(self.toolSelector, "cut"))
         self.eraseAction.triggered.connect(functools.partial(self.toolSelector, "erase"))
+        self.saveRoiAction.triggered.connect(functools.partial(self.saveImage, datafrom="roiData"))
 
     def wireButtons(self):
         self.maskButton.clicked.connect(self.doMasking)
@@ -161,17 +160,19 @@ class LoadQt(QMainWindow):
         self.fileTree.setSortingEnabled(True)
         self.fileTree.setColumnHidden(1, True)
         self.fileTree.setColumnWidth(0, 250)
+        self.fileTree.hide()
 
-        self.fileTree.collapsed.connect(self.test_fun)
-
-        print("wiring done!")
+        self.fileTree.customContextMenuRequested.connect(self.fileTreeContextMenu) #self.fileTree.customContextMenuRequested.emit
         
         
     ################################################  Create Methods #############################################################
-    def test_fun(self):
-        print("Hallo")
-
-
+    def fileTreeContextMenu(self, cursor_point):
+        """Creates context menu for File Browser window"""
+        menu = QtWidgets.QMenu()
+        open = menu.addAction("Open Image")
+        open.triggered.connect(functools.partial(self.openImage, "browser"))
+        cursor = QtGui.QCursor()
+        menu.exec_(cursor.pos())
 
     def doCheckBox(self, CBox, AttributeName):
         """Checking the state of a given Check Box and changing the corresponding Attribute (must be bool). Changes self.AttributeName to (True or False)"""
@@ -186,20 +187,29 @@ class LoadQt(QMainWindow):
         setattr(self, AttributeName, val) #set attribute to value of current spinBox
 
 
-    def openImage(self):
+    def openImage(self, mode="dialog"):
         """Creates file dialog and sets the imported image as pixmap in in the image display label """
-        options = QFileDialog.Options()
-        filePath, _ = QFileDialog.getOpenFileName(self, "Open Image", "",  # open File Dialog
+        if mode == "dialog":
+            options = QFileDialog.Options()
+            filePath, _ = QFileDialog.getOpenFileName(self, "Open Image", "",  # open File Dialog
                                                   "Images (*.*)", options=options)
 
+        elif mode == "browser":
+            idx = self.fileTree.currentIndex() #index of currently selected file
+            filePath = self.fileModel.filePath(idx) #filepath receivied from the browser window
+        
         if not filePath:  # if file dialog is canceled filename is bool-false
             return
         else:
+            
+            #do some file path oprations
             self.filePath = filePath  #set current file Path of image which is loaded
             self.fileExt = os.path.splitext(filePath)[1]        #save file extension from path
             self.folderPath = os.path.dirname(filePath)
-
+            self.fileName = os.path.basename(filePath) #create filename from path
+            
             self.fileTree.setRootIndex(self.fileModel.index(self.folderPath)) #set root path of fileSystem to folder path of currently opened image
+            self.fileTree.show() ## Display file Tree (its first hidden that the user cannot mess around in all directories)
 
             if self.colorspace == 0:  # needs to be adapated if non grayscale images are imported (0 flag for Grayscale images)
 
@@ -221,7 +231,7 @@ class LoadQt(QMainWindow):
             
             #set Data to imported Image
             self.imageDataProcess = np.copy(self.imageDataRaw)
-            self.imageDataFeedback = np.copy(self.imageDataRaw)
+         
 
             ##set slider and buttons enables status
             
@@ -232,28 +242,40 @@ class LoadQt(QMainWindow):
             self.contrastTransformSlider_2.setEnabled(True)
             self.doMeasurementButton.setEnabled(False)
 
-            self.fileName = os.path.basename(filePath) #create filename from path
             self.displayImage(self.imageDataRaw, display="both") #display raw data on both viewers
+            
+            #set some attributes to None
+            self.labelData = None  
+            self.maskData = None
+            self.roiData = None
+            self.imageDataFeedback = None
+            self.nStructs = "--" 
+
             self.setBottomLabel() #set bottom label txt
 
     def displayImage(self, ImageData, display, fitView=True, colorspace="grayscale"):
         """ Converts openCv imported Data to QImage and sets it as pixmap in the image Label """
-        if colorspace == "grayscale":  # needs to be adapated if non grayscale images are imported
-            qformat = QImage.Format_Grayscale8
-            height, width = ImageData.shape[:2]
-            nbytes = ImageData.nbytes  # count total bytes
-            # calculate bytes per Line for correct conversion process
-            bytesPerLine = int(nbytes/height)
+        if ImageData is None:
+            image = QImage()
+        
+        else:
+        
+            if colorspace == "grayscale":  # needs to be adapated if non grayscale images are imported
+                qformat = QImage.Format_Grayscale8
+                height, width = ImageData.shape[:2]
+                nbytes = ImageData.nbytes  # count total bytes
+                # calculate bytes per Line for correct conversion process
+                bytesPerLine = int(nbytes/height)
 
-            image = QImage(ImageData.data, width,
-                           height, bytesPerLine, qformat)
+                image = QImage(ImageData.data, width,
+                               height, bytesPerLine, qformat)
 
-        elif colorspace == "rgb":
-            qformat = QImage.Format_RGB888
-            height, width = ImageData.shape[:2]
-            bytesPerLine = 3 * width
-            
-            image = QImage(ImageData.data, width, height, bytesPerLine, qformat)
+            elif colorspace == "rgb":
+                qformat = QImage.Format_RGB888
+                height, width = ImageData.shape[:2]
+                bytesPerLine = 3 * width
+
+                image = QImage(ImageData.data, width, height, bytesPerLine, qformat)
 
 
         #create pixmap and set photo on certain viewer specified by the value of display
@@ -272,7 +294,7 @@ class LoadQt(QMainWindow):
             self.pixmapProcess = QPixmap.fromImage(image)
             self.viewerProcess.setPhoto(self.pixmapProcess, fitView=fitView)
         
-        self.viewerProcess.toggleDragMode() #toggle corrrect drag mode: set photo alway changed it needs to be refined when there is time for that
+        self.viewerProcess.toggleDragMode() #toggle corrrect drag mode: set photo always changed it needs to be refined when there is time for that
         self.viewerFeedback.toggleDragMode() 
 
     def saveImage(self,  datafrom="roiData"):
@@ -280,8 +302,10 @@ class LoadQt(QMainWindow):
         data = getattr(self, datafrom)
 
         if np.all(data == None):  # basically same procedure as openImage
-            QMessageBox.information(
-                self, "Error Saving Image", "No image was loaded!")
+            if datafrom=="roiData":
+                QMessageBox.information(self, "Error Saving ROI", "No ROI was selected!")
+            else:    
+                QMessageBox.information(self, "Error Saving Image", "No image was loaded!")
         else:
             filePath, _ = QFileDialog.getSaveFileName(
                 self, "Save Image", "", "Image Files (*.png)")
@@ -350,15 +374,17 @@ class LoadQt(QMainWindow):
     
     def doVisualFeedback(self):
         """creates overlay of imageDataProcess (contrast transformed image) and mask. The two images are blended together and displayed on the feedback viewer"""
-        
-        raw3chan = cv2.cvtColor(self.imageDataProcess, cv2.COLOR_GRAY2RGB)
-        
-        colorMask = np.zeros_like(raw3chan)
-        colorMask[:,:,0] = self.maskData
+        if self.imageDataProcess is None or self.maskData is None: #check if some of the required attributes are None if so feedback data is None
+            self.imageDataFeedback = None
+        else:
+            raw3chan = cv2.cvtColor(self.imageDataProcess, cv2.COLOR_GRAY2RGB)
 
-        self.imageDataFeedback = cv2.addWeighted(raw3chan,(1-self.alphaBlend), colorMask, self.alphaBlend, 0)
+            colorMask = np.zeros_like(raw3chan)
+            colorMask[:,:,0] = self.maskData
 
-        self.displayImage(self.imageDataFeedback, display="feedback", fitView=False, colorspace="rgb")
+            self.imageDataFeedback = cv2.addWeighted(raw3chan,(1-self.alphaBlend), colorMask, self.alphaBlend, 0)
+
+            self.displayImage(self.imageDataFeedback, display="feedback", fitView=False, colorspace="rgb")
 
     def undoMasking(self):
         """reseting the overlay of mask and image Data to normal View"""
@@ -371,7 +397,10 @@ class LoadQt(QMainWindow):
 
         self.displayImage(self.imageDataProcess, display="both", fitView=False)
         self.nStructs = "--" #set bottom label struct count
-        self.setBottomLabel() 
+        self.setBottomLabel()
+        self.imageDataFeedback = None
+        self.maskData = None
+        self.labelData = None 
     
     
     def setBottomLabel(self):
@@ -396,24 +425,49 @@ class LoadQt(QMainWindow):
             self.roiAction.setChecked(False)
             self.cutAction.setChecked(False)
             self.eraseAction.setChecked(False)
+            
         
         elif selected_tool == "roi":
             self.dragAction.setChecked(False)
             self.roiAction.setChecked(True)
             self.cutAction.setChecked(False)
             self.eraseAction.setChecked(False)
+            
+            self.viewerFeedback._modifiable = True
+            self.viewerProcess._modifiable = False
+
+            self.displayImage(self.imageDataRaw, display="feedback")
+            self.displayImage(self.roiData, display="process")
 
         elif selected_tool == "cut":
             self.dragAction.setChecked(False)
             self.roiAction.setChecked(False)
             self.cutAction.setChecked(True)
             self.eraseAction.setChecked(False)
+            
+            self.viewerFeedback._modifiable = True
+            self.viewerProcess._modifiable = True
+
+            if self.imageDataFeedback is None and self.maskData is None:
+                self.displayImage(self.imageDataProcess, display="both")
+            else:
+                self.displayImage(self.imageDataFeedback, display="feedback", fitView=False, colorspace="rgb")
+                self.displayImage(self.maskData, display="process", fitView=False)
 
         elif selected_tool == "erase":
             self.dragAction.setChecked(False)
             self.roiAction.setChecked(False)
             self.cutAction.setChecked(False)
             self.eraseAction.setChecked(True)
+            
+            self.viewerFeedback._modifiable = True
+            self.viewerFeedback._modifiable = True
+            
+            if self.imageDataFeedback is None and self.maskData is None:
+                self.displayImage(self.imageDataProcess, display="both")
+            else:
+                self.displayImage(self.imageDataFeedback, display="feedback", fitView=False, colorspace="rgb")
+                self.displayImage(self.maskData, display="process", fitView=False)
     
     def viewerSlotClicked(self, press_point):
         """recieves mouse press coordinate from the currently clicked viewer. This slot is for tools which just need 1 click"""
@@ -421,7 +475,7 @@ class LoadQt(QMainWindow):
             pass
 
         elif self.activeTool == "erase":
-            pass
+            self.doEraseTool(press_point)
         
     def viewerSlotClickedReleased(self, press_point, release_point):
         """recieves mouse press and release coordinate from the currently clicked viewer. This slot is for tools which need 1 click and 1 release coordinate"""
@@ -430,7 +484,8 @@ class LoadQt(QMainWindow):
             self.doRoiTool(press_point, release_point)
             
         elif self.activeTool == "cut":
-            pass
+            
+            self.doCutTool(press_point, release_point)
     
 
 
@@ -463,13 +518,53 @@ class LoadQt(QMainWindow):
             
             setattr(self, "roiData", roiData)  #set attribute for accessing the roi data by other routines
 
+    def doCutTool(self, press_point, release_point):
+        "Sets Mask Data along a line between press and release point to 0. From the old filtered mask a new mask with labels is calculated"
+        
+        if self.maskData is None: #if no mask data is available do nothing
+            return
+        
+        pp = np.array([press_point.x(), press_point.y()])    #save press and release QT points as numpy arrays
+        rp = np.array([release_point.x(), release_point.y()])
+        
+        cv2.line(self.maskData, pp, rp, 0, thickness=1, lineType=4, shift=0) #draw line with black color over mask data --> setting the zeros in the mask to zero :) 
 
+        n_labels, label_matrix = cv2.connectedComponents(self.maskData, connectivity=self.connectivity) #recalculate connected components of the cutted mask
+        
+        self.nStructs = n_labels - 1 #update number of detecteed structs (-1 from Background subtraction)
+        self.labelData = label_matrix   #update label Data
+        
+        self.displayImage(self.maskData, display="process", fitView=False)
+        self.doVisualFeedback()
+        self.setBottomLabel()
+        
+    
+    def doEraseTool(self, press_point):
+        """Choses point in mask Data and sets points with the same label to Zero"""
 
+        if self.labelData is None or self.maskData is None: #if label or mask data is empty return
+            return
 
+        pp = np.array([press_point.x(), press_point.y()]) #convert presspoint to numpy array
 
-#Launch app
+        erase_label = self.labelData[pp[1],pp[0]]  #extract the label number of the clicked point
+
+        new_mask = np.logical_and(self.labelData != erase_label, self.maskData == 255) #filter erase label from Mask Data
+        new_mask = (new_mask*255).astype("uint8") #create uint8 numpy array from bool area in the previous step
+        
+        self.labelData[self.labelData == erase_label] = 0 #set every label entry which corresponds to the erase_label number to zero (Background)
+        self.maskData = new_mask #update self attribute
+        
+        if erase_label != 0: #if no background pixel was clicked, increment number of counted structs by one
+            self.nStructs -= 1
+        
+        self.displayImage(self.maskData, display="process", fitView=False) #display new mask
+        self.doVisualFeedback() #do visual feedback of new mask Data
+        self.setBottomLabel() # update bottom label
+      
+
+##Launch app
 app = QApplication(sys.argv)
 win = LoadQt()
 win.show()
-print(0)
 sys.exit(app.exec())
