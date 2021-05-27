@@ -85,24 +85,30 @@ def cc_filter_eccentricity(labels, filt_idx, min_eccentricity=0, max_eccentricit
         
         contour,_ = cv2.findContours(struct_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)     #calculate outer contours of struct mask
         
+
+        
         ## Fit contour and calculate eccentricity
 
-        #ellipse = cv2.fitEllipse(contour[0])     ## Danger 5 points are requiered for fitting an ellipse !!                                                   
-        #a = np.max(ellipse[1])      ### store big and small (a,b) semiaxis of the ellipse
-        #b = np.min(ellipse[1])
+        if contour[0].shape[0] > 5:
 
-        ### Alternate form using rotated rectangle
-        rect = cv2.minAreaRect(contour[0])
-        a = np.max(rect[1])      ### store big and small (a,b) side of the rectangle
-        b = np.min(rect[1])
-        
-        assert((a >= 0) and (b >= 0))
-        
-        eccentricity[count] = np.sqrt(1-(b**2 / a**2))
-        count += 1
+            ellipse = cv2.fitEllipse(contour[0])     ## Danger 5 points are requiered for fitting an ellipse !!                                                   
+            a = np.max(ellipse[1])      ### store big and small (a,b) semiaxis of the ellipse
+            b = np.min(ellipse[1])
 
+        ### Alternate form using rotated minimum enclosing rectangle
+        else:
+            rect = cv2.minAreaRect(contour[0])
+            a = np.max(rect[1])      ### store big and small (a,b) side of the minimum enclosing rectangle
+            b = np.min(rect[1])
         
-    
+        
+        if a == 0:  ##if avoid division by zero in eccentriciy formula (see else statement)
+            eccentricity[count] = 0.0
+            count += 1
+        else:
+            eccentricity[count] = np.sqrt(1-(b**2 / a**2))
+            count += 1
+
     filt_idx_eccent = np.where(np.logical_and(eccentricity >= min_eccentricity, eccentricity <= max_eccentricity))[0]      #calculate indeces of filt_idx array!, where CC-Eccentricity lies in the intervall [min_eccentricity, max_eccentricity]
     
     filt_idx = apply_filt_idx_stat(filt_idx, filt_idx_eccent)  # Store the labels (indices) where Eccentricity conditions are fullfilled !!

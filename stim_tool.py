@@ -368,6 +368,11 @@ class LoadQt(QMainWindow):
         
             self.nStructs = filt_idx.size  #set struct count to size of filter idx array
 
+        ##set some settings after masking
+        
+        self.contrastTransformSlider_1.setEnabled(False)
+        self.contrastTransformSlider_2.setEnabled(False)
+        
         self.displayImage(self.maskData, display="process", fitView=False) #display image on process side
         self.doVisualFeedback()
         self.setBottomLabel()
@@ -395,6 +400,9 @@ class LoadQt(QMainWindow):
             
             return
 
+        self.contrastTransformSlider_1.setEnabled(True)
+        self.contrastTransformSlider_2.setEnabled(True)
+        
         self.displayImage(self.imageDataProcess, display="both", fitView=False)
         self.nStructs = "--" #set bottom label struct count
         self.setBottomLabel()
