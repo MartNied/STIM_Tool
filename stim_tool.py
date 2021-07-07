@@ -39,7 +39,7 @@ class LoadQt(QMainWindow):
         
         # create and set default settings of the app
         self.colorspace = 0  # zero means grayscale: opencv --> imread() --> grayscaleflag = 0
-        self.clipval = 10000  # intensity clipvalue for the import of 16bit tiff files --> they are clippend normalized and then converted to 8bit grayscale images 
+        self.clipval = 2**16  # intensity clipvalue for the import of 16bit tiff files --> they are clippend normalized and then converted to 8bit grayscale images 
         self.thNeighborhood = 31 # Gaussian Kernel Size for adaptive thresholding in masking process
         self.connectivity = 4   # Connected components connectivity
         self.alphaBlend = 0.3 # alpha value for blending mask over process images (see doVisualFeedback function)
@@ -572,7 +572,12 @@ class LoadQt(QMainWindow):
       
 
 ##Launch app
-app = QApplication(sys.argv)
-win = LoadQt()
-win.show()
-sys.exit(app.exec())
+def main():
+    app = QApplication(sys.argv)
+    win = LoadQt()
+    win.show()
+    sys.exit(app.exec())
+
+
+if __name__ == "__main__":
+    main()
