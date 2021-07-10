@@ -1,6 +1,7 @@
 # Certain Folders and files
 test_data/
 tempCodeRunnerFile.py
+installer/
 
 # VSCode
 .vscode/*
