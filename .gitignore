@@ -1,7 +1,8 @@
 # Certain Folders and files
 test_data/
 tempCodeRunnerFile.py
-installer/
+installer/STIM_TOOL Setup-cache
+installer/STIM_TOOL Setup-SetupFiles
 
 # VSCode
 .vscode/*

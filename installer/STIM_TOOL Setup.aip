@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<DOCUMENT Type="Advanced Installer" CreateVersion="18.4" version="18.4" Modules="simple" RootPath="." Language="en" Id="{EB65454F-5CE3-40A3-AF11-29833FA41555}">
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiPropsComponent">
+    <ROW Property="AI_BITMAP_DISPLAY_MODE" Value="0"/>
+    <ROW Property="AI_CURRENT_YEAR" Value="2021" ValueLocId="-"/>
+    <ROW Property="ALLUSERS" Value="1"/>
+    <ROW Property="ARPNOMODIFY" MultiBuildValue="DefaultBuild:1"/>
+    <ROW Property="ARPNOREPAIR" Value="1"/>
+    <ROW Property="ARPPRODUCTICON" Value="app_icon.exe" Type="8"/>
+    <ROW Property="Manufacturer" Value="MaLuna Productions"/>
+    <ROW Property="ProductCode" Value="1033:{BE36C605-2EBB-46D4-9B82-2A35EA479752} " Type="16"/>
+    <ROW Property="ProductLanguage" Value="1033"/>
+    <ROW Property="ProductName" Value="STIM TOOL"/>
+    <ROW Property="ProductVersion" Value="1.0.0" Type="32"/>
+    <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND"/>
+    <ROW Property="UpgradeCode" Value="{181FB2FC-D052-4C4C-BA7A-E6AF0DBE40E1}"/>
+    <ROW Property="WindowsType9X" MultiBuildValue="DefaultBuild:Windows 9x/ME" ValueLocId="-"/>
+    <ROW Property="WindowsType9XDisplay" MultiBuildValue="DefaultBuild:Windows 9x/ME" ValueLocId="-"/>
+    <ROW Property="WindowsTypeNT40" MultiBuildValue="DefaultBuild:Windows NT 4.0" ValueLocId="-"/>
+    <ROW Property="WindowsTypeNT40Display" MultiBuildValue="DefaultBuild:Windows NT 4.0" ValueLocId="-"/>
+    <ROW Property="WindowsTypeNT50" MultiBuildValue="DefaultBuild:Windows 2000" ValueLocId="-"/>
+    <ROW Property="WindowsTypeNT50Display" MultiBuildValue="DefaultBuild:Windows 2000" ValueLocId="-"/>
+    <ROW Property="WindowsTypeNT5X" MultiBuildValue="DefaultBuild:Windows XP/2003" ValueLocId="-"/>
+    <ROW Property="WindowsTypeNT5XDisplay" MultiBuildValue="DefaultBuild:Windows XP/2003" ValueLocId="-"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiDirsComponent">
+    <ROW Directory="APPDIR" Directory_Parent="TARGETDIR" DefaultDir="APPDIR:." IsPseudoRoot="1"/>
+    <ROW Directory="DesktopFolder" Directory_Parent="TARGETDIR" DefaultDir="DESKTO~1|DesktopFolder" IsPseudoRoot="1"/>
+    <ROW Directory="ProgramFiles64Folder" Directory_Parent="TARGETDIR" DefaultDir="PROGRA~1|ProgramFiles64Folder" IsPseudoRoot="1"/>
+    <ROW Directory="PyQt5_Dir" Directory_Parent="stim_tool_Dir" DefaultDir="PyQt5"/>
+    <ROW Directory="Qt5_Dir" Directory_Parent="PyQt5_Dir" DefaultDir="Qt5"/>
+    <ROW Directory="TARGETDIR" DefaultDir="SourceDir"/>
+    <ROW Directory="__pycache___Dir" Directory_Parent="widgetplugins_Dir" DefaultDir="__PYCA~1|__pycache__"/>
+    <ROW Directory="core_Dir" Directory_Parent="numpy_Dir" DefaultDir="core"/>
+    <ROW Directory="cv2_Dir" Directory_Parent="stim_tool_Dir" DefaultDir="cv2"/>
+    <ROW Directory="fft_Dir" Directory_Parent="numpy_Dir" DefaultDir="fft"/>
+    <ROW Directory="iconengines_Dir" Directory_Parent="plugins_Dir" DefaultDir="ICONEN~1|iconengines"/>
+    <ROW Directory="icons_Dir" Directory_Parent="stim_tool_Dir" DefaultDir="icons"/>
+    <ROW Directory="imageformats_Dir" Directory_Parent="plugins_Dir" DefaultDir="IMAGEF~1|imageformats"/>
+    <ROW Directory="linalg_Dir" Directory_Parent="numpy_Dir" DefaultDir="linalg"/>
+    <ROW Directory="numpy_Dir" Directory_Parent="stim_tool_Dir" DefaultDir="numpy"/>
+    <ROW Directory="platforms_Dir" Directory_Parent="plugins_Dir" DefaultDir="PLATFO~1|platforms"/>
+    <ROW Directory="platformthemes_Dir" Directory_Parent="plugins_Dir" DefaultDir="PLATFO~2|platformthemes"/>
+    <ROW Directory="plugins_Dir" Directory_Parent="Qt5_Dir" DefaultDir="plugins"/>
+    <ROW Directory="printsupport_Dir" Directory_Parent="plugins_Dir" DefaultDir="PRINTS~1|printsupport"/>
+    <ROW Directory="random_Dir" Directory_Parent="numpy_Dir" DefaultDir="random"/>
+    <ROW Directory="setuptools57.1.0.distinfo_Dir" Directory_Parent="stim_tool_Dir" DefaultDir="SETUPT~1.DIS|setuptools-57.1.0.dist-info"/>
+    <ROW Directory="stim_tool_Dir" Directory_Parent="ProgramFiles64Folder" DefaultDir="STIM_T~1|stim_tool"/>
+    <ROW Directory="styles_Dir" Directory_Parent="plugins_Dir" DefaultDir="styles"/>
+    <ROW Directory="translations_Dir" Directory_Parent="Qt5_Dir" DefaultDir="TRANSL~1|translations"/>
+    <ROW Directory="uic_Dir" Directory_Parent="PyQt5_Dir" DefaultDir="uic"/>
+    <ROW Directory="wheel0.36.2.distinfo_Dir" Directory_Parent="stim_tool_Dir" DefaultDir="WHEEL-~1.DIS|wheel-0.36.2.dist-info"/>
+    <ROW Directory="widgetplugins_Dir" Directory_Parent="uic_Dir" DefaultDir="WIDGET~1|widget-plugins"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiCompsComponent">
+    <ROW Component="APPDIR" ComponentId="{59CF740D-43A6-4F19-916D-50D26E0A4868}" Directory_="APPDIR" Attributes="0"/>
+    <ROW Component="MSVCP140.dll" ComponentId="{E9F93F6C-1355-4B95-8DE8-B725C2A0F895}" Directory_="stim_tool_Dir" Attributes="256" KeyPath="MSVCP140.dll"/>
+    <ROW Component="MSVCP140_1.dll" ComponentId="{F7AC5ECC-97AB-4232-8D31-0681EDE80D48}" Directory_="stim_tool_Dir" Attributes="256" KeyPath="MSVCP140_1.dll"/>
+    <ROW Component="ProductInformation" ComponentId="{4EF5048F-C6B8-40EC-B959-18EB2304D8BB}" Directory_="APPDIR" Attributes="4" KeyPath="Version"/>
+    <ROW Component="Qt5Core.dll" ComponentId="{368B80CE-3366-4ACF-AAB6-683820256529}" Directory_="stim_tool_Dir" Attributes="256" KeyPath="Qt5Core.dll"/>
+    <ROW Component="Qt5DBus.dll" ComponentId="{C8762D15-45FF-4982-81E4-8E541392DC91}" Directory_="stim_tool_Dir" Attributes="256" KeyPath="Qt5DBus.dll"/>
+    <ROW Component="Qt5Gui.dll" ComponentId="{7DC946F6-C6A7-4BBE-B2F4-4D75700A23C6}" Directory_="stim_tool_Dir" Attributes="256" KeyPath="Qt5Gui.dll"/>
+    <ROW Component="Qt5Network.dll" ComponentId="{5EC7FA72-1738-4E7B-89E0-48F368F06E0E}" Directory_="stim_tool_Dir" Attributes="256" KeyPath="Qt5Network.dll"/>
+    <ROW Component="Qt5PrintSupport.dll" ComponentId="{B2CDF4CB-5DB8-42DF-B1B5-D1F4D906A612}" Directory_="stim_tool_Dir" Attributes="256" KeyPath="Qt5PrintSupport.dll"/>
+    <ROW Component="Qt5Qml.dll" ComponentId="{B602ED4F-24EE-4842-AD71-45B139E9E3B6}" Directory_="stim_tool_Dir" Attributes="256" KeyPath="Qt5Qml.dll"/>
+    <ROW Component="Qt5QmlModels.dll" ComponentId="{258272F8-3480-49EC-B0DC-4318B8BC42A3}" Directory_="stim_tool_Dir" Attributes="256" KeyPath="Qt5QmlModels.dll"/>
+    <ROW Component="Qt5Quick.dll" ComponentId="{00A2CAA7-583F-4381-89D4-87F6922A0E27}" Directory_="stim_tool_Dir" Attributes="256" KeyPath="Qt5Quick.dll"/>
+    <ROW Component="Qt5Svg.dll" ComponentId="{727C18DA-59BC-4A80-BC6D-05D8563034B2}" Directory_="stim_tool_Dir" Attributes="256" KeyPath="Qt5Svg.dll"/>
+    <ROW Component="Qt5WebSockets.dll" ComponentId="{942D633F-E105-4AD6-A488-E7B1D550E61D}" Directory_="stim_tool_Dir" Attributes="256" KeyPath="Qt5WebSockets.dll"/>
+    <ROW Component="Qt5Widgets.dll" ComponentId="{F593B530-5B99-429F-A33E-0B761085F4BF}" Directory_="stim_tool_Dir" Attributes="256" KeyPath="Qt5Widgets.dll"/>
+    <ROW Component="QtCore.pyd" ComponentId="{5F24D8F4-3F75-410B-88EC-46D91364A14D}" Directory_="PyQt5_Dir" Attributes="256" KeyPath="QtCore.pyd" Type="0"/>
+    <ROW Component="VCRUNTIME140.dll" ComponentId="{6CA68768-1C44-4862-A399-D9474A41E4C7}" Directory_="stim_tool_Dir" Attributes="256" KeyPath="VCRUNTIME140.dll"/>
+    <ROW Component="VCRUNTIME140_1.dll" ComponentId="{F3AE2FEF-2440-43B2-8560-9ECCB62D467B}" Directory_="stim_tool_Dir" Attributes="256" KeyPath="VCRUNTIME140_1.dll"/>
+    <ROW Component="_multiarray_tests.cp39win_amd64.pyd" ComponentId="{FC58EE7E-E801-4333-825F-8D24EE8DCAA3}" Directory_="core_Dir" Attributes="256" KeyPath="_multiarray_tests.cp39win_amd64.pyd" Type="0"/>
+    <ROW Component="_pocketfft_internal.cp39win_amd64.pyd" ComponentId="{17B4372D-415D-4ABB-91A4-472878BFD1BB}" Directory_="fft_Dir" Attributes="256" KeyPath="_pocketfft_internal.cp39win_amd64.pyd" Type="0"/>
+    <ROW Component="app_icon.ico" ComponentId="{A357BCA9-2A00-4216-9352-1ADD5869AF8C}" Directory_="icons_Dir" Attributes="0" KeyPath="app_icon.ico" Type="0"/>
+    <ROW Component="base_library.zip" ComponentId="{72E28FF7-80E1-47E6-AD77-28CB981BA954}" Directory_="stim_tool_Dir" Attributes="0" KeyPath="base_library.zip" Type="0"/>
+    <ROW Component="bit_generator.cp39win_amd64.pyd" ComponentId="{D1651535-D97B-4DAF-89F6-FB8CE118C050}" Directory_="random_Dir" Attributes="256" KeyPath="bit_generator.cp39win_amd64.pyd" Type="0"/>
+    <ROW Component="cv2.cp39win_amd64.pyd" ComponentId="{2F4F1DFA-0188-4BC1-BBDC-FA1599993635}" Directory_="cv2_Dir" Attributes="256" KeyPath="cv2.cp39win_amd64.pyd" Type="0"/>
+    <ROW Component="d3dcompiler_47.dll" ComponentId="{4DEC26AB-A78F-4F7D-A70F-BAB567209925}" Directory_="stim_tool_Dir" Attributes="256" KeyPath="d3dcompiler_47.dll"/>
+    <ROW Component="entry_points.txt" ComponentId="{2A955F8C-670B-4FE8-AAA7-6F8E79C8BD08}" Directory_="setuptools57.1.0.distinfo_Dir" Attributes="0" KeyPath="entry_points.txt" Type="0"/>
+    <ROW Component="entry_points.txt_3" ComponentId="{893D9275-2A1F-4C88-A502-0A79777E09D3}" Directory_="wheel0.36.2.distinfo_Dir" Attributes="0" KeyPath="entry_points.txt_3" Type="0"/>
+    <ROW Component="lapack_lite.cp39win_amd64.pyd" ComponentId="{40E4E251-500A-49C6-9021-11B8948EF129}" Directory_="linalg_Dir" Attributes="256" KeyPath="lapack_lite.cp39win_amd64.pyd" Type="0"/>
+    <ROW Component="libEGL.dll" ComponentId="{EFDB4E88-7A02-47AB-9B6B-60D4C9DB48D0}" Directory_="stim_tool_Dir" Attributes="256" KeyPath="libEGL.dll"/>
+    <ROW Component="libGLESv2.dll" ComponentId="{6078B7CF-49C6-49BD-ACED-5D54E2CD1C77}" Directory_="stim_tool_Dir" Attributes="256" KeyPath="libGLESv2.dll"/>
+    <ROW Component="libcrypto1_1.dll" ComponentId="{49C084A6-354F-4B55-9AD9-1E25BF0CE17A}" Directory_="stim_tool_Dir" Attributes="256" KeyPath="libcrypto1_1.dll"/>
+    <ROW Component="libffi7.dll" ComponentId="{F0F36F13-20B8-4B3A-AAEC-E8B3A1219165}" Directory_="stim_tool_Dir" Attributes="256" KeyPath="libffi7.dll"/>
+    <ROW Component="libopenblas.GK7GX5KEQ4F6UYO3P26ULGBQYHGQO7J4.gfortranwin_amd64.dll" ComponentId="{BA4BAEE7-5044-44E8-BAAC-6748A07DE6F3}" Directory_="stim_tool_Dir" Attributes="256" KeyPath="libopenblas.GK7GX5KEQ4F6UYO3P26ULGBQYHGQO7J4.gfortranwin_amd64.dll"/>
+    <ROW Component="libssl1_1.dll" ComponentId="{56EAECF4-0CFF-46CE-A2E6-2B96FEDF6D7C}" Directory_="stim_tool_Dir" Attributes="256" KeyPath="libssl1_1.dll"/>
+    <ROW Component="opencv_videoio_ffmpeg452_64.dll" ComponentId="{2F2F2E9B-0FF8-4C90-9B16-FC7819CA7FC3}" Directory_="cv2_Dir" Attributes="256" KeyPath="opencv_videoio_ffmpeg452_64.dll"/>
+    <ROW Component="opengl32sw.dll" ComponentId="{5E450BF5-D87F-4901-ABDB-499A32399913}" Directory_="stim_tool_Dir" Attributes="256" KeyPath="opengl32sw.dll"/>
+    <ROW Component="python3.dll" ComponentId="{67DE8174-722B-49BF-B808-FF705FB99148}" Directory_="stim_tool_Dir" Attributes="256" KeyPath="python3.dll"/>
+    <ROW Component="python39.dll" ComponentId="{E78DA8EB-6591-49BA-B45D-0D37F38F9D28}" Directory_="stim_tool_Dir" Attributes="256" KeyPath="python39.dll"/>
+    <ROW Component="pywintypes39.dll" ComponentId="{D9A0ED73-82D9-4301-98F5-3CE109A698DC}" Directory_="stim_tool_Dir" Attributes="256" KeyPath="pywintypes39.dll"/>
+    <ROW Component="qaxcontainer.cpython39.pyc" ComponentId="{995318B0-AC63-4DCA-97EC-3149A186BCF8}" Directory_="__pycache___Dir" Attributes="0" KeyPath="qaxcontainer.cpython39.pyc" Type="0"/>
+    <ROW Component="qaxcontainer.py" ComponentId="{1001722D-8A3F-4E8B-9A69-52AD13AA2033}" Directory_="widgetplugins_Dir" Attributes="0" KeyPath="qaxcontainer.py" Type="0"/>
+    <ROW Component="qgif.dll" ComponentId="{46B01925-A256-49C6-BAEA-02086E9E0A04}" Directory_="imageformats_Dir" Attributes="256" KeyPath="qgif.dll"/>
+    <ROW Component="qicns.dll" ComponentId="{E52F7682-05EA-4CDF-BEF2-014C1ECC1988}" Directory_="imageformats_Dir" Attributes="256" KeyPath="qicns.dll"/>
+    <ROW Component="qico.dll" ComponentId="{F56E05AB-1BCF-4D73-8B67-5E290045E55A}" Directory_="imageformats_Dir" Attributes="256" KeyPath="qico.dll"/>
+    <ROW Component="qjpeg.dll" ComponentId="{054D316D-DCEA-4FFB-99EC-C8ED1C899E2A}" Directory_="imageformats_Dir" Attributes="256" KeyPath="qjpeg.dll"/>
+    <ROW Component="qminimal.dll" ComponentId="{3978A05B-F0FF-4995-A59C-A15245A5FA7B}" Directory_="platforms_Dir" Attributes="256" KeyPath="qminimal.dll"/>
+    <ROW Component="qoffscreen.dll" ComponentId="{2F3F70E4-8D50-49D4-86B7-E4262CB0C1B6}" Directory_="platforms_Dir" Attributes="256" KeyPath="qoffscreen.dll"/>
+    <ROW Component="qsvg.dll" ComponentId="{EDFE3B05-11CC-4E97-B607-29DD142E368A}" Directory_="imageformats_Dir" Attributes="256" KeyPath="qsvg.dll"/>
+    <ROW Component="qsvgicon.dll" ComponentId="{EE2B691E-2B11-4DCB-AA0C-FD5A0115F6AF}" Directory_="iconengines_Dir" Attributes="256" KeyPath="qsvgicon.dll"/>
+    <ROW Component="qtbase_ar.qm" ComponentId="{05D655B8-8A24-43D2-854E-0F6F6488F241}" Directory_="translations_Dir" Attributes="0" KeyPath="qtbase_ar.qm" Type="0"/>
+    <ROW Component="qtga.dll" ComponentId="{C2989C34-4267-4559-9899-FA2F083BAB0D}" Directory_="imageformats_Dir" Attributes="256" KeyPath="qtga.dll"/>
+    <ROW Component="qtiff.dll" ComponentId="{98402CAB-C2B4-4CC9-AE14-E8B056357000}" Directory_="imageformats_Dir" Attributes="256" KeyPath="qtiff.dll"/>
+    <ROW Component="qwbmp.dll" ComponentId="{32D7FDF4-4760-4CA3-83EE-EA735D864F33}" Directory_="imageformats_Dir" Attributes="256" KeyPath="qwbmp.dll"/>
+    <ROW Component="qwebgl.dll" ComponentId="{0287F1D0-2AFB-4CAC-B46F-59B15B43540D}" Directory_="platforms_Dir" Attributes="256" KeyPath="qwebgl.dll"/>
+    <ROW Component="qwebp.dll" ComponentId="{7335DD28-5D7A-4D16-8423-B2D08A6E9A4C}" Directory_="imageformats_Dir" Attributes="256" KeyPath="qwebp.dll"/>
+    <ROW Component="qwindows.dll" ComponentId="{D6B31DA5-D5A0-4684-AAC2-520258304774}" Directory_="platforms_Dir" Attributes="256" KeyPath="qwindows.dll"/>
+    <ROW Component="qwindowsvistastyle.dll" ComponentId="{07321E0A-78CB-44B0-9A3F-08FF4C938292}" Directory_="styles_Dir" Attributes="256" KeyPath="qwindowsvistastyle.dll"/>
+    <ROW Component="qxdgdesktopportal.dll" ComponentId="{8603510E-B57B-4EC5-9A43-1AABFC21BB43}" Directory_="platformthemes_Dir" Attributes="256" KeyPath="qxdgdesktopportal.dll"/>
+    <ROW Component="stim_tool.exe" ComponentId="{3C8DD725-F210-4759-B8E6-2C51C8A49CD7}" Directory_="stim_tool_Dir" Attributes="256" KeyPath="stim_tool.exe"/>
+    <ROW Component="windowsprintersupport.dll" ComponentId="{550BCB57-F152-4D0B-9023-613AE8DA6AA2}" Directory_="printsupport_Dir" Attributes="256" KeyPath="windowsprintersupport.dll"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiFeatsComponent">
+    <ROW Feature="MainFeature" Title="MainFeature" Description="Description" Display="1" Level="1" Directory_="APPDIR" Attributes="0"/>
+    <ATTRIBUTE name="CurrentFeature" value="MainFeature"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiFilesComponent">
+    <ROW File="base_library.zip" Component_="base_library.zip" FileName="BASE_L~1.ZIP|base_library.zip" Attributes="0" SourcePath="..\dist\stim_tool\base_library.zip" SelfReg="false"/>
+    <ROW File="cv2.cp39win_amd64.pyd" Component_="cv2.cp39win_amd64.pyd" FileName="CV2CP3~1.PYD|cv2.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\dist\stim_tool\cv2\cv2.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="opencv_videoio_ffmpeg452_64.dll" Component_="opencv_videoio_ffmpeg452_64.dll" FileName="OPENCV~1.DLL|opencv_videoio_ffmpeg452_64.dll" Attributes="0" SourcePath="..\dist\stim_tool\cv2\opencv_videoio_ffmpeg452_64.dll" SelfReg="false"/>
+    <ROW File="d3dcompiler_47.dll" Component_="d3dcompiler_47.dll" FileName="D3DCOM~1.DLL|d3dcompiler_47.dll" Attributes="0" SourcePath="..\dist\stim_tool\d3dcompiler_47.dll" SelfReg="false"/>
+    <ROW File="app_icon.ico" Component_="app_icon.ico" FileName="app_icon.ico" Attributes="0" SourcePath="..\dist\stim_tool\icons\app_icon.ico" SelfReg="false"/>
+    <ROW File="cut.ico" Component_="app_icon.ico" FileName="cut.ico" Attributes="0" SourcePath="..\dist\stim_tool\icons\cut.ico" SelfReg="false"/>
+    <ROW File="drap_icon.ico" Component_="app_icon.ico" FileName="DRAP_I~1.ICO|drap_icon.ico" Attributes="0" SourcePath="..\dist\stim_tool\icons\drap_icon.ico" SelfReg="false"/>
+    <ROW File="eraser.ico" Component_="app_icon.ico" FileName="eraser.ico" Attributes="0" SourcePath="..\dist\stim_tool\icons\eraser.ico" SelfReg="false"/>
+    <ROW File="meduni_logo.png" Component_="app_icon.ico" FileName="MEDUNI~1.PNG|meduni_logo.png" Attributes="0" SourcePath="..\dist\stim_tool\icons\meduni_logo.png" SelfReg="false"/>
+    <ROW File="roi_icon.ico" Component_="app_icon.ico" FileName="roi_icon.ico" Attributes="0" SourcePath="..\dist\stim_tool\icons\roi_icon.ico" SelfReg="false"/>
+    <ROW File="libcrypto1_1.dll" Component_="libcrypto1_1.dll" FileName="LIBCRY~1.DLL|libcrypto-1_1.dll" Attributes="0" SourcePath="..\dist\stim_tool\libcrypto-1_1.dll" SelfReg="false"/>
+    <ROW File="libEGL.dll" Component_="libEGL.dll" FileName="libEGL.dll" Attributes="0" SourcePath="..\dist\stim_tool\libEGL.dll" SelfReg="false"/>
+    <ROW File="libffi7.dll" Component_="libffi7.dll" FileName="libffi-7.dll" Attributes="0" SourcePath="..\dist\stim_tool\libffi-7.dll" SelfReg="false"/>
+    <ROW File="libGLESv2.dll" Component_="libGLESv2.dll" FileName="LIBGLE~1.DLL|libGLESv2.dll" Attributes="0" SourcePath="..\dist\stim_tool\libGLESv2.dll" SelfReg="false"/>
+    <ROW File="libopenblas.GK7GX5KEQ4F6UYO3P26ULGBQYHGQO7J4.gfortranwin_amd64.dll" Component_="libopenblas.GK7GX5KEQ4F6UYO3P26ULGBQYHGQO7J4.gfortranwin_amd64.dll" FileName="LIBOPE~1.DLL|libopenblas.GK7GX5KEQ4F6UYO3P26ULGBQYHGQO7J4.gfortran-win_amd64.dll" Attributes="0" SourcePath="..\dist\stim_tool\libopenblas.GK7GX5KEQ4F6UYO3P26ULGBQYHGQO7J4.gfortran-win_amd64.dll" SelfReg="false"/>
+    <ROW File="libssl1_1.dll" Component_="libssl1_1.dll" FileName="LIBSSL~1.DLL|libssl-1_1.dll" Attributes="0" SourcePath="..\dist\stim_tool\libssl-1_1.dll" SelfReg="false"/>
+    <ROW File="MSVCP140.dll" Component_="MSVCP140.dll" FileName="MSVCP140.dll" Attributes="0" SourcePath="..\dist\stim_tool\MSVCP140.dll" SelfReg="false"/>
+    <ROW File="MSVCP140_1.dll" Component_="MSVCP140_1.dll" FileName="MSVCP1~1.DLL|MSVCP140_1.dll" Attributes="0" SourcePath="..\dist\stim_tool\MSVCP140_1.dll" SelfReg="false"/>
+    <ROW File="_multiarray_tests.cp39win_amd64.pyd" Component_="_multiarray_tests.cp39win_amd64.pyd" FileName="_MULTI~1.PYD|_multiarray_tests.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\dist\stim_tool\numpy\core\_multiarray_tests.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="_multiarray_umath.cp39win_amd64.pyd" Component_="_multiarray_tests.cp39win_amd64.pyd" FileName="_MULTI~2.PYD|_multiarray_umath.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\dist\stim_tool\numpy\core\_multiarray_umath.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="_pocketfft_internal.cp39win_amd64.pyd" Component_="_pocketfft_internal.cp39win_amd64.pyd" FileName="_POCKE~1.PYD|_pocketfft_internal.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\dist\stim_tool\numpy\fft\_pocketfft_internal.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="lapack_lite.cp39win_amd64.pyd" Component_="lapack_lite.cp39win_amd64.pyd" FileName="LAPACK~1.PYD|lapack_lite.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\dist\stim_tool\numpy\linalg\lapack_lite.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="_umath_linalg.cp39win_amd64.pyd" Component_="lapack_lite.cp39win_amd64.pyd" FileName="_UMATH~1.PYD|_umath_linalg.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\dist\stim_tool\numpy\linalg\_umath_linalg.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="bit_generator.cp39win_amd64.pyd" Component_="bit_generator.cp39win_amd64.pyd" FileName="BIT_GE~1.PYD|bit_generator.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\dist\stim_tool\numpy\random\bit_generator.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="mtrand.cp39win_amd64.pyd" Component_="bit_generator.cp39win_amd64.pyd" FileName="MTRAND~1.PYD|mtrand.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\dist\stim_tool\numpy\random\mtrand.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="_bounded_integers.cp39win_amd64.pyd" Component_="bit_generator.cp39win_amd64.pyd" FileName="_BOUND~1.PYD|_bounded_integers.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\dist\stim_tool\numpy\random\_bounded_integers.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="_common.cp39win_amd64.pyd" Component_="bit_generator.cp39win_amd64.pyd" FileName="_COMMO~1.PYD|_common.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\dist\stim_tool\numpy\random\_common.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="_generator.cp39win_amd64.pyd" Component_="bit_generator.cp39win_amd64.pyd" FileName="_GENER~1.PYD|_generator.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\dist\stim_tool\numpy\random\_generator.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="_mt19937.cp39win_amd64.pyd" Component_="bit_generator.cp39win_amd64.pyd" FileName="_MT199~1.PYD|_mt19937.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\dist\stim_tool\numpy\random\_mt19937.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="_pcg64.cp39win_amd64.pyd" Component_="bit_generator.cp39win_amd64.pyd" FileName="_PCG64~1.PYD|_pcg64.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\dist\stim_tool\numpy\random\_pcg64.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="_philox.cp39win_amd64.pyd" Component_="bit_generator.cp39win_amd64.pyd" FileName="_PHILO~1.PYD|_philox.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\dist\stim_tool\numpy\random\_philox.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="_sfc64.cp39win_amd64.pyd" Component_="bit_generator.cp39win_amd64.pyd" FileName="_SFC64~1.PYD|_sfc64.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\dist\stim_tool\numpy\random\_sfc64.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="opengl32sw.dll" Component_="opengl32sw.dll" FileName="OPENGL~1.DLL|opengl32sw.dll" Attributes="0" SourcePath="..\dist\stim_tool\opengl32sw.dll" SelfReg="false"/>
+    <ROW File="pyexpat.pyd" Component_="base_library.zip" FileName="pyexpat.pyd" Attributes="0" SourcePath="..\dist\stim_tool\pyexpat.pyd" SelfReg="false"/>
+    <ROW File="qsvgicon.dll" Component_="qsvgicon.dll" FileName="qsvgicon.dll" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\plugins\iconengines\qsvgicon.dll" SelfReg="false"/>
+    <ROW File="qgif.dll" Component_="qgif.dll" FileName="qgif.dll" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\plugins\imageformats\qgif.dll" SelfReg="false"/>
+    <ROW File="qicns.dll" Component_="qicns.dll" FileName="qicns.dll" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\plugins\imageformats\qicns.dll" SelfReg="false"/>
+    <ROW File="qico.dll" Component_="qico.dll" FileName="qico.dll" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\plugins\imageformats\qico.dll" SelfReg="false"/>
+    <ROW File="qjpeg.dll" Component_="qjpeg.dll" FileName="qjpeg.dll" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\plugins\imageformats\qjpeg.dll" SelfReg="false"/>
+    <ROW File="qsvg.dll" Component_="qsvg.dll" FileName="qsvg.dll" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\plugins\imageformats\qsvg.dll" SelfReg="false"/>
+    <ROW File="qtga.dll" Component_="qtga.dll" FileName="qtga.dll" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\plugins\imageformats\qtga.dll" SelfReg="false"/>
+    <ROW File="qtiff.dll" Component_="qtiff.dll" FileName="qtiff.dll" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\plugins\imageformats\qtiff.dll" SelfReg="false"/>
+    <ROW File="qwbmp.dll" Component_="qwbmp.dll" FileName="qwbmp.dll" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\plugins\imageformats\qwbmp.dll" SelfReg="false"/>
+    <ROW File="qwebp.dll" Component_="qwebp.dll" FileName="qwebp.dll" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\plugins\imageformats\qwebp.dll" SelfReg="false"/>
+    <ROW File="qminimal.dll" Component_="qminimal.dll" FileName="qminimal.dll" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\plugins\platforms\qminimal.dll" SelfReg="false"/>
+    <ROW File="qoffscreen.dll" Component_="qoffscreen.dll" FileName="QOFFSC~1.DLL|qoffscreen.dll" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\plugins\platforms\qoffscreen.dll" SelfReg="false"/>
+    <ROW File="qwebgl.dll" Component_="qwebgl.dll" FileName="qwebgl.dll" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\plugins\platforms\qwebgl.dll" SelfReg="false"/>
+    <ROW File="qwindows.dll" Component_="qwindows.dll" FileName="qwindows.dll" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\plugins\platforms\qwindows.dll" SelfReg="false"/>
+    <ROW File="qxdgdesktopportal.dll" Component_="qxdgdesktopportal.dll" FileName="QXDGDE~1.DLL|qxdgdesktopportal.dll" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\plugins\platformthemes\qxdgdesktopportal.dll" SelfReg="false"/>
+    <ROW File="windowsprintersupport.dll" Component_="windowsprintersupport.dll" FileName="WINDOW~1.DLL|windowsprintersupport.dll" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\plugins\printsupport\windowsprintersupport.dll" SelfReg="false"/>
+    <ROW File="qwindowsvistastyle.dll" Component_="qwindowsvistastyle.dll" FileName="QWINDO~1.DLL|qwindowsvistastyle.dll" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\plugins\styles\qwindowsvistastyle.dll" SelfReg="false"/>
+    <ROW File="qtbase_ar.qm" Component_="qtbase_ar.qm" FileName="QTBASE~1.QM|qtbase_ar.qm" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\translations\qtbase_ar.qm" SelfReg="false"/>
+    <ROW File="qtbase_bg.qm" Component_="qtbase_ar.qm" FileName="QTBASE~2.QM|qtbase_bg.qm" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\translations\qtbase_bg.qm" SelfReg="false"/>
+    <ROW File="qtbase_ca.qm" Component_="qtbase_ar.qm" FileName="QTBASE~3.QM|qtbase_ca.qm" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\translations\qtbase_ca.qm" SelfReg="false"/>
+    <ROW File="qtbase_cs.qm" Component_="qtbase_ar.qm" FileName="QTBASE~4.QM|qtbase_cs.qm" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\translations\qtbase_cs.qm" SelfReg="false"/>
+    <ROW File="qtbase_da.qm" Component_="qtbase_ar.qm" FileName="QTBASE~5.QM|qtbase_da.qm" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\translations\qtbase_da.qm" SelfReg="false"/>
+    <ROW File="qtbase_de.qm" Component_="qtbase_ar.qm" FileName="QTBASE~6.QM|qtbase_de.qm" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\translations\qtbase_de.qm" SelfReg="false"/>
+    <ROW File="qtbase_en.qm" Component_="qtbase_ar.qm" FileName="QTBASE~7.QM|qtbase_en.qm" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\translations\qtbase_en.qm" SelfReg="false"/>
+    <ROW File="qtbase_es.qm" Component_="qtbase_ar.qm" FileName="QTBASE~8.QM|qtbase_es.qm" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\translations\qtbase_es.qm" SelfReg="false"/>
+    <ROW File="qtbase_fi.qm" Component_="qtbase_ar.qm" FileName="QTBASE~9.QM|qtbase_fi.qm" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\translations\qtbase_fi.qm" SelfReg="false"/>
+    <ROW File="qtbase_fr.qm" Component_="qtbase_ar.qm" FileName="QTBAS~10.QM|qtbase_fr.qm" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\translations\qtbase_fr.qm" SelfReg="false"/>
+    <ROW File="qtbase_gd.qm" Component_="qtbase_ar.qm" FileName="QTBAS~11.QM|qtbase_gd.qm" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\translations\qtbase_gd.qm" SelfReg="false"/>
+    <ROW File="qtbase_he.qm" Component_="qtbase_ar.qm" FileName="QTBAS~12.QM|qtbase_he.qm" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\translations\qtbase_he.qm" SelfReg="false"/>
+    <ROW File="qtbase_hu.qm" Component_="qtbase_ar.qm" FileName="QTBAS~13.QM|qtbase_hu.qm" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\translations\qtbase_hu.qm" SelfReg="false"/>
+    <ROW File="qtbase_it.qm" Component_="qtbase_ar.qm" FileName="QTBAS~14.QM|qtbase_it.qm" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\translations\qtbase_it.qm" SelfReg="false"/>
+    <ROW File="qtbase_ja.qm" Component_="qtbase_ar.qm" FileName="QTBAS~15.QM|qtbase_ja.qm" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\translations\qtbase_ja.qm" SelfReg="false"/>
+    <ROW File="qtbase_ko.qm" Component_="qtbase_ar.qm" FileName="QTBAS~16.QM|qtbase_ko.qm" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\translations\qtbase_ko.qm" SelfReg="false"/>
+    <ROW File="qtbase_lv.qm" Component_="qtbase_ar.qm" FileName="QTBAS~17.QM|qtbase_lv.qm" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\translations\qtbase_lv.qm" SelfReg="false"/>
+    <ROW File="qtbase_pl.qm" Component_="qtbase_ar.qm" FileName="QTBAS~18.QM|qtbase_pl.qm" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\translations\qtbase_pl.qm" SelfReg="false"/>
+    <ROW File="qtbase_ru.qm" Component_="qtbase_ar.qm" FileName="QTBAS~19.QM|qtbase_ru.qm" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\translations\qtbase_ru.qm" SelfReg="false"/>
+    <ROW File="qtbase_sk.qm" Component_="qtbase_ar.qm" FileName="QTBAS~20.QM|qtbase_sk.qm" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\translations\qtbase_sk.qm" SelfReg="false"/>
+    <ROW File="qtbase_tr.qm" Component_="qtbase_ar.qm" FileName="QTBAS~21.QM|qtbase_tr.qm" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\translations\qtbase_tr.qm" SelfReg="false"/>
+    <ROW File="qtbase_uk.qm" Component_="qtbase_ar.qm" FileName="QTBAS~22.QM|qtbase_uk.qm" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\translations\qtbase_uk.qm" SelfReg="false"/>
+    <ROW File="qtbase_zh_TW.qm" Component_="qtbase_ar.qm" FileName="QTBAS~23.QM|qtbase_zh_TW.qm" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\Qt5\translations\qtbase_zh_TW.qm" SelfReg="false"/>
+    <ROW File="QtCore.pyd" Component_="QtCore.pyd" FileName="QtCore.pyd" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\QtCore.pyd" SelfReg="false"/>
+    <ROW File="QtGui.pyd" Component_="QtCore.pyd" FileName="QtGui.pyd" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\QtGui.pyd" SelfReg="false"/>
+    <ROW File="QtPrintSupport.pyd" Component_="QtCore.pyd" FileName="QTPRIN~1.PYD|QtPrintSupport.pyd" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\QtPrintSupport.pyd" SelfReg="false"/>
+    <ROW File="QtWidgets.pyd" Component_="QtCore.pyd" FileName="QTWIDG~1.PYD|QtWidgets.pyd" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\QtWidgets.pyd" SelfReg="false"/>
+    <ROW File="sip.cp39win_amd64.pyd" Component_="QtCore.pyd" FileName="SIPCP3~1.PYD|sip.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\sip.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="qaxcontainer.py" Component_="qaxcontainer.py" FileName="QAXCON~1.PY|qaxcontainer.py" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\uic\widget-plugins\qaxcontainer.py" SelfReg="false"/>
+    <ROW File="qscintilla.py" Component_="qaxcontainer.py" FileName="QSCINT~1.PY|qscintilla.py" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\uic\widget-plugins\qscintilla.py" SelfReg="false"/>
+    <ROW File="qtcharts.py" Component_="qaxcontainer.py" FileName="qtcharts.py" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\uic\widget-plugins\qtcharts.py" SelfReg="false"/>
+    <ROW File="qtprintsupport.py" Component_="qaxcontainer.py" FileName="QTPRIN~1.PY|qtprintsupport.py" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\uic\widget-plugins\qtprintsupport.py" SelfReg="false"/>
+    <ROW File="qtquickwidgets.py" Component_="qaxcontainer.py" FileName="QTQUIC~1.PY|qtquickwidgets.py" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\uic\widget-plugins\qtquickwidgets.py" SelfReg="false"/>
+    <ROW File="qtwebenginewidgets.py" Component_="qaxcontainer.py" FileName="QTWEBE~1.PY|qtwebenginewidgets.py" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\uic\widget-plugins\qtwebenginewidgets.py" SelfReg="false"/>
+    <ROW File="qtwebkit.py" Component_="qaxcontainer.py" FileName="qtwebkit.py" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\uic\widget-plugins\qtwebkit.py" SelfReg="false"/>
+    <ROW File="qaxcontainer.cpython39.pyc" Component_="qaxcontainer.cpython39.pyc" FileName="QAXCON~1.PYC|qaxcontainer.cpython-39.pyc" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\uic\widget-plugins\__pycache__\qaxcontainer.cpython-39.pyc" SelfReg="false"/>
+    <ROW File="qscintilla.cpython39.pyc" Component_="qaxcontainer.cpython39.pyc" FileName="QSCINT~1.PYC|qscintilla.cpython-39.pyc" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\uic\widget-plugins\__pycache__\qscintilla.cpython-39.pyc" SelfReg="false"/>
+    <ROW File="qtcharts.cpython39.pyc" Component_="qaxcontainer.cpython39.pyc" FileName="QTCHAR~1.PYC|qtcharts.cpython-39.pyc" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\uic\widget-plugins\__pycache__\qtcharts.cpython-39.pyc" SelfReg="false"/>
+    <ROW File="qtprintsupport.cpython39.pyc" Component_="qaxcontainer.cpython39.pyc" FileName="QTPRIN~1.PYC|qtprintsupport.cpython-39.pyc" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\uic\widget-plugins\__pycache__\qtprintsupport.cpython-39.pyc" SelfReg="false"/>
+    <ROW File="qtquickwidgets.cpython39.pyc" Component_="qaxcontainer.cpython39.pyc" FileName="QTQUIC~1.PYC|qtquickwidgets.cpython-39.pyc" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\uic\widget-plugins\__pycache__\qtquickwidgets.cpython-39.pyc" SelfReg="false"/>
+    <ROW File="qtwebenginewidgets.cpython39.pyc" Component_="qaxcontainer.cpython39.pyc" FileName="QTWEBE~1.PYC|qtwebenginewidgets.cpython-39.pyc" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\uic\widget-plugins\__pycache__\qtwebenginewidgets.cpython-39.pyc" SelfReg="false"/>
+    <ROW File="qtwebkit.cpython39.pyc" Component_="qaxcontainer.cpython39.pyc" FileName="QTWEBK~1.PYC|qtwebkit.cpython-39.pyc" Attributes="0" SourcePath="..\dist\stim_tool\PyQt5\uic\widget-plugins\__pycache__\qtwebkit.cpython-39.pyc" SelfReg="false"/>
+    <ROW File="python3.dll" Component_="python3.dll" FileName="python3.dll" Attributes="0" SourcePath="..\dist\stim_tool\python3.dll" SelfReg="false"/>
+    <ROW File="python39.dll" Component_="python39.dll" FileName="python39.dll" Attributes="0" SourcePath="..\dist\stim_tool\python39.dll" SelfReg="false"/>
+    <ROW File="pywintypes39.dll" Component_="pywintypes39.dll" FileName="PYWINT~1.DLL|pywintypes39.dll" Attributes="0" SourcePath="..\dist\stim_tool\pywintypes39.dll" SelfReg="false"/>
+    <ROW File="Qt5Core.dll" Component_="Qt5Core.dll" FileName="Qt5Core.dll" Attributes="0" SourcePath="..\dist\stim_tool\Qt5Core.dll" SelfReg="false"/>
+    <ROW File="Qt5DBus.dll" Component_="Qt5DBus.dll" FileName="Qt5DBus.dll" Attributes="0" SourcePath="..\dist\stim_tool\Qt5DBus.dll" SelfReg="false"/>
+    <ROW File="Qt5Gui.dll" Component_="Qt5Gui.dll" FileName="Qt5Gui.dll" Attributes="0" SourcePath="..\dist\stim_tool\Qt5Gui.dll" SelfReg="false"/>
+    <ROW File="Qt5Network.dll" Component_="Qt5Network.dll" FileName="QT5NET~1.DLL|Qt5Network.dll" Attributes="0" SourcePath="..\dist\stim_tool\Qt5Network.dll" SelfReg="false"/>
+    <ROW File="Qt5PrintSupport.dll" Component_="Qt5PrintSupport.dll" FileName="QT5PRI~1.DLL|Qt5PrintSupport.dll" Attributes="0" SourcePath="..\dist\stim_tool\Qt5PrintSupport.dll" SelfReg="false"/>
+    <ROW File="Qt5Qml.dll" Component_="Qt5Qml.dll" FileName="Qt5Qml.dll" Attributes="0" SourcePath="..\dist\stim_tool\Qt5Qml.dll" SelfReg="false"/>
+    <ROW File="Qt5QmlModels.dll" Component_="Qt5QmlModels.dll" FileName="QT5QML~1.DLL|Qt5QmlModels.dll" Attributes="0" SourcePath="..\dist\stim_tool\Qt5QmlModels.dll" SelfReg="false"/>
+    <ROW File="Qt5Quick.dll" Component_="Qt5Quick.dll" FileName="Qt5Quick.dll" Attributes="0" SourcePath="..\dist\stim_tool\Qt5Quick.dll" SelfReg="false"/>
+    <ROW File="Qt5Svg.dll" Component_="Qt5Svg.dll" FileName="Qt5Svg.dll" Attributes="0" SourcePath="..\dist\stim_tool\Qt5Svg.dll" SelfReg="false"/>
+    <ROW File="Qt5WebSockets.dll" Component_="Qt5WebSockets.dll" FileName="QT5WEB~1.DLL|Qt5WebSockets.dll" Attributes="0" SourcePath="..\dist\stim_tool\Qt5WebSockets.dll" SelfReg="false"/>
+    <ROW File="Qt5Widgets.dll" Component_="Qt5Widgets.dll" FileName="QT5WID~1.DLL|Qt5Widgets.dll" Attributes="0" SourcePath="..\dist\stim_tool\Qt5Widgets.dll" SelfReg="false"/>
+    <ROW File="select.pyd" Component_="base_library.zip" FileName="select.pyd" Attributes="0" SourcePath="..\dist\stim_tool\select.pyd" SelfReg="false"/>
+    <ROW File="entry_points.txt" Component_="entry_points.txt" FileName="ENTRY_~1.TXT|entry_points.txt" Attributes="0" SourcePath="..\dist\stim_tool\setuptools-57.1.0.dist-info\entry_points.txt" SelfReg="false"/>
+    <ROW File="INSTALLER" Component_="entry_points.txt" FileName="INSTAL~1|INSTALLER" Attributes="0" SourcePath="..\dist\stim_tool\setuptools-57.1.0.dist-info\INSTALLER" SelfReg="false"/>
+    <ROW File="LICENSE" Component_="entry_points.txt" FileName="LICENSE" Attributes="0" SourcePath="..\dist\stim_tool\setuptools-57.1.0.dist-info\LICENSE" SelfReg="false"/>
+    <ROW File="METADATA" Component_="entry_points.txt" FileName="METADATA" Attributes="0" SourcePath="..\dist\stim_tool\setuptools-57.1.0.dist-info\METADATA" SelfReg="false"/>
+    <ROW File="RECORD" Component_="entry_points.txt" FileName="RECORD" Attributes="0" SourcePath="..\dist\stim_tool\setuptools-57.1.0.dist-info\RECORD" SelfReg="false"/>
+    <ROW File="top_level.txt" Component_="entry_points.txt" FileName="TOP_LE~1.TXT|top_level.txt" Attributes="0" SourcePath="..\dist\stim_tool\setuptools-57.1.0.dist-info\top_level.txt" SelfReg="false"/>
+    <ROW File="WHEEL" Component_="entry_points.txt" FileName="WHEEL" Attributes="0" SourcePath="..\dist\stim_tool\setuptools-57.1.0.dist-info\WHEEL" SelfReg="false"/>
+    <ROW File="stim_tool.exe" Component_="stim_tool.exe" FileName="STIM_T~1.EXE|stim_tool.exe" Attributes="0" SourcePath="..\dist\stim_tool\stim_tool.exe" SelfReg="false" DigSign="true"/>
+    <ROW File="stim_tool.exe.manifest" Component_="base_library.zip" FileName="STIM_T~1.MAN|stim_tool.exe.manifest" Attributes="0" SourcePath="..\dist\stim_tool\stim_tool.exe.manifest" SelfReg="false"/>
+    <ROW File="stim_tool_main_window.ui" Component_="base_library.zip" FileName="STIM_T~1.UI|stim_tool_main_window.ui" Attributes="0" SourcePath="..\dist\stim_tool\stim_tool_main_window.ui" SelfReg="false"/>
+    <ROW File="unicodedata.pyd" Component_="base_library.zip" FileName="UNICOD~1.PYD|unicodedata.pyd" Attributes="0" SourcePath="..\dist\stim_tool\unicodedata.pyd" SelfReg="false"/>
+    <ROW File="VCRUNTIME140.dll" Component_="VCRUNTIME140.dll" FileName="VCRUNT~1.DLL|VCRUNTIME140.dll" Attributes="0" SourcePath="..\dist\stim_tool\VCRUNTIME140.dll" SelfReg="false"/>
+    <ROW File="VCRUNTIME140_1.dll" Component_="VCRUNTIME140_1.dll" FileName="VCRUNT~2.DLL|VCRUNTIME140_1.dll" Attributes="0" SourcePath="..\dist\stim_tool\VCRUNTIME140_1.dll" SelfReg="false"/>
+    <ROW File="entry_points.txt_3" Component_="entry_points.txt_3" FileName="ENTRY_~1.TXT|entry_points.txt" Attributes="0" SourcePath="..\dist\stim_tool\wheel-0.36.2.dist-info\entry_points.txt" SelfReg="false"/>
+    <ROW File="INSTALLER_3" Component_="entry_points.txt_3" FileName="INSTAL~1|INSTALLER" Attributes="0" SourcePath="..\dist\stim_tool\wheel-0.36.2.dist-info\INSTALLER" SelfReg="false"/>
+    <ROW File="LICENSE.txt" Component_="entry_points.txt_3" FileName="LICENSE.txt" Attributes="0" SourcePath="..\dist\stim_tool\wheel-0.36.2.dist-info\LICENSE.txt" SelfReg="false"/>
+    <ROW File="METADATA_3" Component_="entry_points.txt_3" FileName="METADATA" Attributes="0" SourcePath="..\dist\stim_tool\wheel-0.36.2.dist-info\METADATA" SelfReg="false"/>
+    <ROW File="RECORD_3" Component_="entry_points.txt_3" FileName="RECORD" Attributes="0" SourcePath="..\dist\stim_tool\wheel-0.36.2.dist-info\RECORD" SelfReg="false"/>
+    <ROW File="REQUESTED" Component_="entry_points.txt_3" FileName="REQUES~1|REQUESTED" Attributes="0" SourcePath="..\dist\stim_tool\wheel-0.36.2.dist-info\REQUESTED" SelfReg="false"/>
+    <ROW File="top_level.txt_3" Component_="entry_points.txt_3" FileName="TOP_LE~1.TXT|top_level.txt" Attributes="0" SourcePath="..\dist\stim_tool\wheel-0.36.2.dist-info\top_level.txt" SelfReg="false"/>
+    <ROW File="WHEEL_3" Component_="entry_points.txt_3" FileName="WHEEL" Attributes="0" SourcePath="..\dist\stim_tool\wheel-0.36.2.dist-info\WHEEL" SelfReg="false"/>
+    <ROW File="win32pdh.pyd" Component_="base_library.zip" FileName="win32pdh.pyd" Attributes="0" SourcePath="..\dist\stim_tool\win32pdh.pyd" SelfReg="false"/>
+    <ROW File="_asyncio.pyd" Component_="base_library.zip" FileName="_asyncio.pyd" Attributes="0" SourcePath="..\dist\stim_tool\_asyncio.pyd" SelfReg="false"/>
+    <ROW File="_bz2.pyd" Component_="base_library.zip" FileName="_bz2.pyd" Attributes="0" SourcePath="..\dist\stim_tool\_bz2.pyd" SelfReg="false"/>
+    <ROW File="_ctypes.pyd" Component_="base_library.zip" FileName="_ctypes.pyd" Attributes="0" SourcePath="..\dist\stim_tool\_ctypes.pyd" SelfReg="false"/>
+    <ROW File="_decimal.pyd" Component_="base_library.zip" FileName="_decimal.pyd" Attributes="0" SourcePath="..\dist\stim_tool\_decimal.pyd" SelfReg="false"/>
+    <ROW File="_elementtree.pyd" Component_="base_library.zip" FileName="_ELEME~1.PYD|_elementtree.pyd" Attributes="0" SourcePath="..\dist\stim_tool\_elementtree.pyd" SelfReg="false"/>
+    <ROW File="_hashlib.pyd" Component_="base_library.zip" FileName="_hashlib.pyd" Attributes="0" SourcePath="..\dist\stim_tool\_hashlib.pyd" SelfReg="false"/>
+    <ROW File="_lzma.pyd" Component_="base_library.zip" FileName="_lzma.pyd" Attributes="0" SourcePath="..\dist\stim_tool\_lzma.pyd" SelfReg="false"/>
+    <ROW File="_multiprocessing.pyd" Component_="base_library.zip" FileName="_MULTI~1.PYD|_multiprocessing.pyd" Attributes="0" SourcePath="..\dist\stim_tool\_multiprocessing.pyd" SelfReg="false"/>
+    <ROW File="_overlapped.pyd" Component_="base_library.zip" FileName="_OVERL~1.PYD|_overlapped.pyd" Attributes="0" SourcePath="..\dist\stim_tool\_overlapped.pyd" SelfReg="false"/>
+    <ROW File="_queue.pyd" Component_="base_library.zip" FileName="_queue.pyd" Attributes="0" SourcePath="..\dist\stim_tool\_queue.pyd" SelfReg="false"/>
+    <ROW File="_socket.pyd" Component_="base_library.zip" FileName="_socket.pyd" Attributes="0" SourcePath="..\dist\stim_tool\_socket.pyd" SelfReg="false"/>
+    <ROW File="_ssl.pyd" Component_="base_library.zip" FileName="_ssl.pyd" Attributes="0" SourcePath="..\dist\stim_tool\_ssl.pyd" SelfReg="false"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.BootstrOptComponent">
+    <ROW BootstrOptKey="GlobalOptions" DownloadFolder="[AppDataFolder][|Manufacturer]\[|ProductName]\prerequisites" Options="2"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.BuildComponent">
+    <ROW BuildKey="DefaultBuild" BuildName="DefaultBuild" BuildOrder="1" BuildType="0" Languages="en" InstallationType="4" UseLargeSchema="true"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.DictionaryComponent">
+    <ROW Path="&lt;AI_DICTS&gt;ui.ail"/>
+    <ROW Path="&lt;AI_DICTS&gt;ui_en.ail"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.FragmentComponent">
+    <ROW Fragment="CommonUI.aip" Path="&lt;AI_FRAGS&gt;CommonUI.aip"/>
+    <ROW Fragment="FolderDlg.aip" Path="&lt;AI_THEMES&gt;classic\fragments\FolderDlg.aip"/>
+    <ROW Fragment="MaintenanceTypeDlg.aip" Path="&lt;AI_THEMES&gt;classic\fragments\MaintenanceTypeDlg.aip"/>
+    <ROW Fragment="MaintenanceWelcomeDlg.aip" Path="&lt;AI_THEMES&gt;classic\fragments\MaintenanceWelcomeDlg.aip"/>
+    <ROW Fragment="SequenceDialogs.aip" Path="&lt;AI_THEMES&gt;classic\fragments\SequenceDialogs.aip"/>
+    <ROW Fragment="Sequences.aip" Path="&lt;AI_FRAGS&gt;Sequences.aip"/>
+    <ROW Fragment="StaticUIStrings.aip" Path="&lt;AI_FRAGS&gt;StaticUIStrings.aip"/>
+    <ROW Fragment="UI.aip" Path="&lt;AI_THEMES&gt;classic\fragments\UI.aip"/>
+    <ROW Fragment="Validation.aip" Path="&lt;AI_FRAGS&gt;Validation.aip"/>
+    <ROW Fragment="VerifyRemoveDlg.aip" Path="&lt;AI_THEMES&gt;classic\fragments\VerifyRemoveDlg.aip"/>
+    <ROW Fragment="VerifyRepairDlg.aip" Path="&lt;AI_THEMES&gt;classic\fragments\VerifyRepairDlg.aip"/>
+    <ROW Fragment="WelcomeDlg.aip" Path="&lt;AI_THEMES&gt;classic\fragments\WelcomeDlg.aip"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiBinaryComponent">
+    <ROW Name="aicustact.dll" SourcePath="&lt;AI_CUSTACTS&gt;aicustact.dll"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiControlEventComponent">
+    <ROW Dialog_="WelcomeDlg" Control_="Next" Event="NewDialog" Argument="FolderDlg" Condition="AI_INSTALL" Ordering="1"/>
+    <ROW Dialog_="FolderDlg" Control_="Next" Event="NewDialog" Argument="VerifyReadyDlg" Condition="AI_INSTALL" Ordering="201"/>
+    <ROW Dialog_="FolderDlg" Control_="Back" Event="NewDialog" Argument="WelcomeDlg" Condition="AI_INSTALL" Ordering="1"/>
+    <ROW Dialog_="MaintenanceWelcomeDlg" Control_="Next" Event="NewDialog" Argument="MaintenanceTypeDlg" Condition="AI_MAINT" Ordering="99"/>
+    <ROW Dialog_="VerifyReadyDlg" Control_="Install" Event="EndDialog" Argument="Return" Condition="AI_MAINT" Ordering="198"/>
+    <ROW Dialog_="VerifyReadyDlg" Control_="Back" Event="NewDialog" Argument="CustomizeDlg" Condition="AI_MAINT" Ordering="202"/>
+    <ROW Dialog_="VerifyReadyDlg" Control_="Install" Event="EndDialog" Argument="Return" Condition="AI_INSTALL" Ordering="197"/>
+    <ROW Dialog_="VerifyReadyDlg" Control_="Back" Event="NewDialog" Argument="FolderDlg" Condition="AI_INSTALL" Ordering="201"/>
+    <ROW Dialog_="CustomizeDlg" Control_="Next" Event="NewDialog" Argument="VerifyReadyDlg" Condition="AI_MAINT" Ordering="101"/>
+    <ROW Dialog_="CustomizeDlg" Control_="Back" Event="NewDialog" Argument="MaintenanceTypeDlg" Condition="AI_MAINT" Ordering="1"/>
+    <ROW Dialog_="MaintenanceTypeDlg" Control_="ChangeButton" Event="NewDialog" Argument="CustomizeDlg" Condition="AI_MAINT" Ordering="501"/>
+    <ROW Dialog_="MaintenanceTypeDlg" Control_="Back" Event="NewDialog" Argument="MaintenanceWelcomeDlg" Condition="AI_MAINT" Ordering="1"/>
+    <ROW Dialog_="MaintenanceTypeDlg" Control_="RemoveButton" Event="NewDialog" Argument="VerifyRemoveDlg" Condition="AI_MAINT AND InstallMode=&quot;Remove&quot;" Ordering="601"/>
+    <ROW Dialog_="VerifyRemoveDlg" Control_="Back" Event="NewDialog" Argument="MaintenanceTypeDlg" Condition="AI_MAINT AND InstallMode=&quot;Remove&quot;" Ordering="1"/>
+    <ROW Dialog_="MaintenanceTypeDlg" Control_="RepairButton" Event="NewDialog" Argument="VerifyRepairDlg" Condition="AI_MAINT AND InstallMode=&quot;Repair&quot;" Ordering="601"/>
+    <ROW Dialog_="VerifyRepairDlg" Control_="Back" Event="NewDialog" Argument="MaintenanceTypeDlg" Condition="AI_MAINT AND InstallMode=&quot;Repair&quot;" Ordering="1"/>
+    <ROW Dialog_="VerifyRepairDlg" Control_="Repair" Event="EndDialog" Argument="Return" Condition="AI_MAINT AND InstallMode=&quot;Repair&quot;" Ordering="399" Options="1"/>
+    <ROW Dialog_="VerifyRemoveDlg" Control_="Remove" Event="EndDialog" Argument="Return" Condition="AI_MAINT AND InstallMode=&quot;Remove&quot;" Ordering="299" Options="1"/>
+    <ROW Dialog_="PatchWelcomeDlg" Control_="Next" Event="NewDialog" Argument="VerifyReadyDlg" Condition="AI_PATCH" Ordering="201"/>
+    <ROW Dialog_="ResumeDlg" Control_="Install" Event="EndDialog" Argument="Return" Condition="AI_RESUME" Ordering="299"/>
+    <ROW Dialog_="VerifyReadyDlg" Control_="Install" Event="EndDialog" Argument="Return" Condition="AI_PATCH" Ordering="199"/>
+    <ROW Dialog_="VerifyReadyDlg" Control_="Back" Event="NewDialog" Argument="PatchWelcomeDlg" Condition="AI_PATCH" Ordering="203"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiCreateFolderComponent">
+    <ROW Directory_="APPDIR" Component_="APPDIR" ManualDelete="true"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiCustActComponent">
+    <ROW Action="AI_DOWNGRADE" Type="19" Target="4010"/>
+    <ROW Action="AI_DpiContentScale" Type="1" Source="aicustact.dll" Target="DpiContentScale"/>
+    <ROW Action="AI_EnableDebugLog" Type="321" Source="aicustact.dll" Target="EnableDebugLog"/>
+    <ROW Action="AI_InstallModeCheck" Type="1" Source="aicustact.dll" Target="UpdateInstallMode" WithoutSeq="true"/>
+    <ROW Action="AI_PREPARE_UPGRADE" Type="65" Source="aicustact.dll" Target="PrepareUpgrade"/>
+    <ROW Action="AI_RESTORE_LOCATION" Type="65" Source="aicustact.dll" Target="RestoreLocation"/>
+    <ROW Action="AI_ResolveKnownFolders" Type="1" Source="aicustact.dll" Target="AI_ResolveKnownFolders"/>
+    <ROW Action="AI_SHOW_LOG" Type="65" Source="aicustact.dll" Target="LaunchLogFile" WithoutSeq="true"/>
+    <ROW Action="AI_STORE_LOCATION" Type="51" Source="ARPINSTALLLOCATION" Target="[APPDIR]"/>
+    <ROW Action="SET_APPDIR" Type="307" Source="APPDIR" Target="[ProgramFilesFolder][Manufacturer]\[ProductName]"/>
+    <ROW Action="SET_SHORTCUTDIR" Type="307" Source="SHORTCUTDIR" Target="[ProgramMenuFolder][ProductName]"/>
+    <ROW Action="SET_TARGETDIR_TO_APPDIR" Type="51" Source="TARGETDIR" Target="[APPDIR]"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiFeatCompsComponent">
+    <ROW Feature_="MainFeature" Component_="APPDIR"/>
+    <ROW Feature_="MainFeature" Component_="ProductInformation"/>
+    <ROW Feature_="MainFeature" Component_="base_library.zip"/>
+    <ROW Feature_="MainFeature" Component_="cv2.cp39win_amd64.pyd"/>
+    <ROW Feature_="MainFeature" Component_="opencv_videoio_ffmpeg452_64.dll"/>
+    <ROW Feature_="MainFeature" Component_="d3dcompiler_47.dll"/>
+    <ROW Feature_="MainFeature" Component_="app_icon.ico"/>
+    <ROW Feature_="MainFeature" Component_="libcrypto1_1.dll"/>
+    <ROW Feature_="MainFeature" Component_="libEGL.dll"/>
+    <ROW Feature_="MainFeature" Component_="libffi7.dll"/>
+    <ROW Feature_="MainFeature" Component_="libGLESv2.dll"/>
+    <ROW Feature_="MainFeature" Component_="libopenblas.GK7GX5KEQ4F6UYO3P26ULGBQYHGQO7J4.gfortranwin_amd64.dll"/>
+    <ROW Feature_="MainFeature" Component_="libssl1_1.dll"/>
+    <ROW Feature_="MainFeature" Component_="MSVCP140.dll"/>
+    <ROW Feature_="MainFeature" Component_="MSVCP140_1.dll"/>
+    <ROW Feature_="MainFeature" Component_="_multiarray_tests.cp39win_amd64.pyd"/>
+    <ROW Feature_="MainFeature" Component_="_pocketfft_internal.cp39win_amd64.pyd"/>
+    <ROW Feature_="MainFeature" Component_="lapack_lite.cp39win_amd64.pyd"/>
+    <ROW Feature_="MainFeature" Component_="bit_generator.cp39win_amd64.pyd"/>
+    <ROW Feature_="MainFeature" Component_="opengl32sw.dll"/>
+    <ROW Feature_="MainFeature" Component_="qsvgicon.dll"/>
+    <ROW Feature_="MainFeature" Component_="qgif.dll"/>
+    <ROW Feature_="MainFeature" Component_="qicns.dll"/>
+    <ROW Feature_="MainFeature" Component_="qico.dll"/>
+    <ROW Feature_="MainFeature" Component_="qjpeg.dll"/>
+    <ROW Feature_="MainFeature" Component_="qsvg.dll"/>
+    <ROW Feature_="MainFeature" Component_="qtga.dll"/>
+    <ROW Feature_="MainFeature" Component_="qtiff.dll"/>
+    <ROW Feature_="MainFeature" Component_="qwbmp.dll"/>
+    <ROW Feature_="MainFeature" Component_="qwebp.dll"/>
+    <ROW Feature_="MainFeature" Component_="qminimal.dll"/>
+    <ROW Feature_="MainFeature" Component_="qoffscreen.dll"/>
+    <ROW Feature_="MainFeature" Component_="qwebgl.dll"/>
+    <ROW Feature_="MainFeature" Component_="qwindows.dll"/>
+    <ROW Feature_="MainFeature" Component_="qxdgdesktopportal.dll"/>
+    <ROW Feature_="MainFeature" Component_="windowsprintersupport.dll"/>
+    <ROW Feature_="MainFeature" Component_="qwindowsvistastyle.dll"/>
+    <ROW Feature_="MainFeature" Component_="qtbase_ar.qm"/>
+    <ROW Feature_="MainFeature" Component_="QtCore.pyd"/>
+    <ROW Feature_="MainFeature" Component_="qaxcontainer.py"/>
+    <ROW Feature_="MainFeature" Component_="qaxcontainer.cpython39.pyc"/>
+    <ROW Feature_="MainFeature" Component_="python3.dll"/>
+    <ROW Feature_="MainFeature" Component_="python39.dll"/>
+    <ROW Feature_="MainFeature" Component_="pywintypes39.dll"/>
+    <ROW Feature_="MainFeature" Component_="Qt5Core.dll"/>
+    <ROW Feature_="MainFeature" Component_="Qt5DBus.dll"/>
+    <ROW Feature_="MainFeature" Component_="Qt5Gui.dll"/>
+    <ROW Feature_="MainFeature" Component_="Qt5Network.dll"/>
+    <ROW Feature_="MainFeature" Component_="Qt5PrintSupport.dll"/>
+    <ROW Feature_="MainFeature" Component_="Qt5Qml.dll"/>
+    <ROW Feature_="MainFeature" Component_="Qt5QmlModels.dll"/>
+    <ROW Feature_="MainFeature" Component_="Qt5Quick.dll"/>
+    <ROW Feature_="MainFeature" Component_="Qt5Svg.dll"/>
+    <ROW Feature_="MainFeature" Component_="Qt5WebSockets.dll"/>
+    <ROW Feature_="MainFeature" Component_="Qt5Widgets.dll"/>
+    <ROW Feature_="MainFeature" Component_="entry_points.txt"/>
+    <ROW Feature_="MainFeature" Component_="stim_tool.exe"/>
+    <ROW Feature_="MainFeature" Component_="VCRUNTIME140.dll"/>
+    <ROW Feature_="MainFeature" Component_="VCRUNTIME140_1.dll"/>
+    <ROW Feature_="MainFeature" Component_="entry_points.txt_3"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiIconsComponent">
+    <ROW Name="app_icon.exe" SourcePath="..\icons\app_icon.ico" Index="0"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiInstExSeqComponent">
+    <ROW Action="AI_DOWNGRADE" Condition="AI_NEWERPRODUCTFOUND AND (UILevel &lt;&gt; 5)" Sequence="210"/>
+    <ROW Action="AI_RESTORE_LOCATION" Condition="APPDIR=&quot;&quot;" Sequence="749"/>
+    <ROW Action="AI_STORE_LOCATION" Condition="(Not Installed) OR REINSTALL" Sequence="1501"/>
+    <ROW Action="AI_PREPARE_UPGRADE" Condition="AI_UPGRADE=&quot;No&quot; AND (Not Installed)" Sequence="1399"/>
+    <ROW Action="AI_ResolveKnownFolders" Sequence="52"/>
+    <ROW Action="AI_EnableDebugLog" Sequence="51"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiInstallUISequenceComponent">
+    <ROW Action="AI_RESTORE_LOCATION" Condition="APPDIR=&quot;&quot;" Sequence="749"/>
+    <ROW Action="AI_ResolveKnownFolders" Sequence="53"/>
+    <ROW Action="AI_DpiContentScale" Sequence="52"/>
+    <ROW Action="AI_EnableDebugLog" Sequence="51"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiLaunchConditionsComponent">
+    <ROW Condition="((VersionNT &lt;&gt; 501) AND (VersionNT &lt;&gt; 502))" Description="[ProductName] cannot be installed on [WindowsTypeNT5XDisplay]." DescriptionLocId="AI.LaunchCondition.NoNT5X" IsPredefined="true" Builds="DefaultBuild"/>
+    <ROW Condition="(VersionNT &lt;&gt; 400)" Description="[ProductName] cannot be installed on [WindowsTypeNT40Display]." DescriptionLocId="AI.LaunchCondition.NoNT40" IsPredefined="true" Builds="DefaultBuild"/>
+    <ROW Condition="(VersionNT &lt;&gt; 500)" Description="[ProductName] cannot be installed on [WindowsTypeNT50Display]." DescriptionLocId="AI.LaunchCondition.NoNT50" IsPredefined="true" Builds="DefaultBuild"/>
+    <ROW Condition="VersionNT" Description="[ProductName] cannot be installed on [WindowsType9XDisplay]." DescriptionLocId="AI.LaunchCondition.No9X" IsPredefined="true" Builds="DefaultBuild"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiRegsComponent">
+    <ROW Registry="Path" Root="-1" Key="Software\[Manufacturer]\[ProductName]" Name="Path" Value="[APPDIR]" Component_="ProductInformation"/>
+    <ROW Registry="Version" Root="-1" Key="Software\[Manufacturer]\[ProductName]" Name="Version" Value="[ProductVersion]" Component_="ProductInformation"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiShortsComponent">
+    <ROW Shortcut="STIM_TOOL" Directory_="DesktopFolder" Name="STIM_T~1|STIM_TOOL" Component_="stim_tool.exe" Target="[#stim_tool.exe]" Hotkey="0" Icon_="app_icon.exe" IconIndex="0" ShowCmd="1" WkDir="stim_tool_Dir"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiThemeComponent">
+    <ATTRIBUTE name="UsedTheme" value="classic"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiUpgradeComponent">
+    <ROW UpgradeCode="[|UpgradeCode]" VersionMin="0.0.1" VersionMax="[|ProductVersion]" Attributes="257" ActionProperty="OLDPRODUCTS"/>
+    <ROW UpgradeCode="[|UpgradeCode]" VersionMin="[|ProductVersion]" Attributes="2" ActionProperty="AI_NEWERPRODUCTFOUND"/>
+  </COMPONENT>
+</DOCUMENT>
