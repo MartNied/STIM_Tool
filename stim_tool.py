@@ -13,6 +13,7 @@ import functools
 from PhotoViewer import PhotoViewer
 from ImageFunctions import contrast_cut, cc_filter_idx
 
+
 class LoadQt(QMainWindow):
     def __init__(self):
         super(LoadQt, self).__init__()
@@ -76,6 +77,7 @@ class LoadQt(QMainWindow):
         self.labelData = None  #Label Matrix for corresponding mask Data 
         self.maskData = None # Mask Data from Threhsolding and filtering
         self.roiData = None # Data from Roi: Selected from image Data raw
+        self.roiPoints = None # Numpy array of points which define the ROI Polygon
         self.nStructs = "--" # number of counted structs
         
 
@@ -147,6 +149,7 @@ class LoadQt(QMainWindow):
     def wireViewers(self):
         self.viewerFeedback.photoClicked.connect(self.viewerSlotClicked)
         self.viewerProcess.photoClicked.connect(self.viewerSlotClicked)
+        self.viewerFeedback.photoHitButton.connect(self.doRoiToolPoly)
 
         self.viewerFeedback.photoClickedReleased.connect(self.viewerSlotClickedReleased)
         self.viewerProcess.photoClickedReleased.connect(self.viewerSlotClickedReleased)
@@ -163,7 +166,6 @@ class LoadQt(QMainWindow):
         self.fileTree.hide()
 
         self.fileTree.customContextMenuRequested.connect(self.fileTreeContextMenu) #self.fileTree.customContextMenuRequested.emit
-        
         
     ################################################  Create Methods #############################################################
     def fileTreeContextMenu(self, cursor_point):
@@ -185,7 +187,6 @@ class LoadQt(QMainWindow):
         """Checking state of given Spin Box and changing the corresponding Attribute (can be float)"""
         val = SBox.value()  #Get value of currently changed Spin box
         setattr(self, AttributeName, val) #set attribute to value of current spinBox
-
 
     def openImage(self, mode="dialog"):
         """Creates file dialog and sets the imported image as pixmap in in the image display label """
@@ -335,7 +336,6 @@ class LoadQt(QMainWindow):
         self.displayImage(self.imageDataProcess, display="both", fitView=False)
         self.setBottomLabel()
         
-
     def doMasking(self):
         """creates mask from image Data process (contrast transformed image). First an adapative threshold method is used and afterwards the mask is filtered with by the function cc_filter_idx. From the filtered labels a filtered mask is calculated and displayed"""
         if np.all(self.imageDataProcess == None):  # check if image was loaded
@@ -409,7 +409,6 @@ class LoadQt(QMainWindow):
         self.imageDataFeedback = None
         self.maskData = None
         self.labelData = None 
-    
     
     def setBottomLabel(self):
         "creates a string which is displayed in the bottom laybel for user information"
@@ -488,17 +487,47 @@ class LoadQt(QMainWindow):
     def viewerSlotClickedReleased(self, press_point, release_point):
         """recieves mouse press and release coordinate from the currently clicked viewer. This slot is for tools which need 1 click and 1 release coordinate"""
         if self.activeTool == "roi":
-           
-            self.doRoiTool(press_point, release_point)
+            pass
+            #self.doRoiTool(press_point, release_point)
             
         elif self.activeTool == "cut":
             
             self.doCutTool(press_point, release_point)
+        
+    def doRoiToolPoly(self, roi_points):
+            # covert qt points to numpy array for usage with open cv
+            if roi_points: ##if list of roi points is not empty do roi calculation
+                pts_list = []  #create list for storing
+                for point in roi_points: #iterate over all points
+                    pts_list.append([point.x(), point.y()]) #extract x and y coordinate of qt points put it to list and append it on storing list
+                cvpoints = np.array(pts_list, dtype=np.int32)   #convert list created to numpy array
+
+                height = self.imageDataRaw.shape[0]  #extract image shape for mask creation
+                width = self.imageDataRaw.shape[1]
+
+                mask = np.zeros((height, width), dtype=np.uint8) #create mask array
+
+                cv2.fillPoly(mask, [cvpoints], (255))  #create mask with ones where the polygon area is located
+
+                masked_image = cv2.bitwise_and(self.imageDataRaw, self.imageDataRaw, mask = mask) #perform bitwise and values >1 are treated as 1
+
+                bounding_rect = cv2.boundingRect(cvpoints) #calculate bounding rectangle for cropping the image
+
+                roiData = masked_image[bounding_rect[1]: bounding_rect[1] + bounding_rect[3], bounding_rect[0]: bounding_rect[0] + bounding_rect[2]].copy() #cropp image to appropriate size
+
+                if np.all(roiData.shape) != 0 and len(roiData.shape) == 2: #check if roi selection has shape dimension 2 and non zero dimension 
+                
+                    self.displayImage(roiData, display="process", fitView=True) #display Roi on process side
+                    self.viewerProcess._modifiable=False #set viewer to not modifiable (avoiding user from using the roi tool on the process side)
+                    setattr(self, "roiData", roiData)  #set attribute for accessing the roi data by other routines
+                    setattr(self,"roiPoints", cvpoints) #set roiPoints to numpy array containing the corners of the polygon
+            else: #if list of roi points is empty
+                self.displayImage(None, display="process", fitView=True)
+                setattr(self, "roiData", None)  #set attribute for accessing the roi data by other routines
+                setattr(self,"roiPoints", None) #set roiPoints to numpy array containing the corners of the polygon
     
-
-
     def doRoiTool(self, press_point, release_point):
-        """calculate roi from rawImage data and press and release points in image Viewer"""
+        """calculate roi from rawImage data and press and release points in image Viewer. This method is obsulete. In the current version doRoiTool Poly is used"""
         pp = np.array([press_point.x(), press_point.y()])    #save press and release QT points as numpy arrays
         rp = np.array([release_point.x(), release_point.y()])
        
@@ -523,7 +552,6 @@ class LoadQt(QMainWindow):
   
             self.displayImage(roiData, display="process", fitView=True) #display Roi on process side
             self.viewerProcess._modifiable=False #set viewer to not modifiable (avoiding user from using the roi tool on the process side)
-            
             setattr(self, "roiData", roiData)  #set attribute for accessing the roi data by other routines
 
     def doCutTool(self, press_point, release_point):
@@ -545,8 +573,7 @@ class LoadQt(QMainWindow):
         self.displayImage(self.maskData, display="process", fitView=False)
         self.doVisualFeedback()
         self.setBottomLabel()
-        
-    
+            
     def doEraseTool(self, press_point):
         """Choses point in mask Data and sets points with the same label to Zero"""
 

@@ -1,20 +1,17 @@
-1) Preprocessing the images: 
-	(done) What Datatype? 
-	(done) Are the intensity distributions comparable in every image?  
-	(done) Find a transform to properly displays the images
+ROI selector should be a Polygon (done) - additional try getting the thing movable
 
-2) Processing the images:
-	- Find a proper TH-value for binarizing the images (Otsu if distribution hast two seperated peaks only)
-	(done) Do the segmentation in connected components
-	(done) implement certain criteria for filtering the structures (case activated and case resting) 
-	(done) implement evaluation of parameters (case activated and case resting) 
+Length Filter
 
-3) User Interface:
-	- Basic Layout
-	- Visual Feedback of counted structures
-	- ROI Selector: Use Input image Select ROI Perform processing
-	- User interaction: Remove marked structures
-	- User interaction: cut connected structures
-	- Session View: Load multiple images and store the session in a csv file
-	- Session Statistic  
-				
+Undo Function
+
+do measurement - write single csv for each selection 
+
+create report file
+
+Save selection and correpsonding images when doing measurement
+
+Slider should be set to defaults value
+
+upper th arrowskeys in wrong direction
+
+Setting Default Vals: Area: min 5, max 300, Lower TH: 23, Upper TH 36
