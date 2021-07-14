@@ -81,14 +81,13 @@ class PolygonAnnotation(QtWidgets.QGraphicsPolygonItem):
             del it
 
     def removeAllPoints(self):
-        
+
         for item in self.m_items:
             self.scene().removeItem(item)
 
         self.m_points = []
         self.m_items = []
         self.setPolygon(QtGui.QPolygonF(self.m_points))
-    
 
     def movePoint(self, i, p):
         if 0 <= i < len(self.m_points):
@@ -115,6 +114,16 @@ class PolygonAnnotation(QtWidgets.QGraphicsPolygonItem):
     def hoverLeaveEvent(self, event):
         self.setBrush(QtGui.QBrush(QtCore.Qt.NoBrush))
         super(PolygonAnnotation, self).hoverLeaveEvent(event)
+
+    def show(self):
+        self.setVisible(True)
+        for item in self.m_items:
+            item.setVisible(True)
+
+    def hide(self):
+        self.setVisible(False)
+        for item in self.m_items:
+            item.setVisible(False)
 
 
 class Instructions(Enum):
@@ -149,7 +158,8 @@ class AnnotationScene(QtWidgets.QGraphicsScene):
 
     def mouseMoveEvent(self, event):
         if self.current_instruction == Instructions.Polygon_Instruction:
-            self.polygon_item.movePoint(self.polygon_item.number_of_points()-1, event.scenePos())
+            self.polygon_item.movePoint(
+                self.polygon_item.number_of_points()-1, event.scenePos())
         super(AnnotationScene, self).mouseMoveEvent(event)
 
 
@@ -158,10 +168,13 @@ class AnnotationView(QtWidgets.QGraphicsView):
 
     def __init__(self, parent=None):
         super(AnnotationView, self).__init__(parent)
-        self.setRenderHints(QtGui.QPainter.Antialiasing | QtGui.QPainter.SmoothPixmapTransform)
+        self.setRenderHints(QtGui.QPainter.Antialiasing |
+                            QtGui.QPainter.SmoothPixmapTransform)
         self.setMouseTracking(True)
-        QtWidgets.QShortcut(QtGui.QKeySequence.ZoomIn, self, activated=self.zoomIn)
-        QtWidgets.QShortcut(QtGui.QKeySequence.ZoomOut, self, activated=self.zoomOut)
+        QtWidgets.QShortcut(QtGui.QKeySequence.ZoomIn,
+                            self, activated=self.zoomIn)
+        QtWidgets.QShortcut(QtGui.QKeySequence.ZoomOut,
+                            self, activated=self.zoomOut)
 
     @QtCore.pyqtSlot()
     def zoomIn(self):
@@ -187,7 +200,8 @@ class AnnotationWindow(QtWidgets.QMainWindow):
         self.setCentralWidget(self.m_view)
         self.create_menus()
 
-        QtWidgets.QShortcut(QtCore.Qt.Key_Escape, self, activated=partial(self.m_scene.setCurrentInstruction, Instructions.No_Instruction))
+        QtWidgets.QShortcut(QtCore.Qt.Key_Escape, self, activated=partial(
+            self.m_scene.setCurrentInstruction, Instructions.No_Instruction))
 
     def create_menus(self):
         menu_file = self.menuBar().addMenu("File")
@@ -196,17 +210,20 @@ class AnnotationWindow(QtWidgets.QMainWindow):
 
         menu_instructions = self.menuBar().addMenu("Intructions")
         polygon_action = menu_instructions.addAction("Polygon")
-        polygon_action.triggered.connect(partial(self.m_scene.setCurrentInstruction, Instructions.Polygon_Instruction))
+        polygon_action.triggered.connect(
+            partial(self.m_scene.setCurrentInstruction, Instructions.Polygon_Instruction))
 
     @QtCore.pyqtSlot()
     def load_image(self):
-        filename, _ = QtWidgets.QFileDialog.getOpenFileName(self, 
-            "Open Image",
-            QtCore.QStandardPaths.writableLocation(QtCore.QStandardPaths.PicturesLocation), #QtCore.QDir.currentPath(), 
-            "Image Files (*.png *.jpg *.bmp)")
+        filename, _ = QtWidgets.QFileDialog.getOpenFileName(self,
+                                                            "Open Image",
+                                                            QtCore.QStandardPaths.writableLocation(
+                                                                QtCore.QStandardPaths.PicturesLocation),  # QtCore.QDir.currentPath(),
+                                                            "Image Files (*.png *.jpg *.bmp)")
         if filename:
             self.m_scene.load_image(filename)
-            self.m_view.fitInView(self.m_scene.image_item, QtCore.Qt.KeepAspectRatio)
+            self.m_view.fitInView(self.m_scene.image_item,
+                                  QtCore.Qt.KeepAspectRatio)
             self.m_view.centerOn(self.m_scene.image_item)
 
 
@@ -218,4 +235,3 @@ if __name__ == '__main__':
     w.resize(640, 480)
     w.show()
     sys.exit(app.exec_())
-

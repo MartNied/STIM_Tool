@@ -1,6 +1,8 @@
 ROI selector should be a Polygon (done) - additional try getting the thing movable
 
-Length Filter
+Hide ROI annotation if oder mode is selected (done)
+
+Length Filter (done)
 
 Undo Function
 
