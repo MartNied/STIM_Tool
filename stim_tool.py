@@ -49,6 +49,8 @@ class LoadQt(QMainWindow):
         # Gaussian Kernel Size for adaptive thresholding in masking process
         self.thNeighborhood = 31
         self.connectivity = 4   # Connected components connectivity
+        self.maxUndos = 5       # max list length for storing old mask states
+
         # alpha value for blending mask over process images (see doVisualFeedback function)
         self.alphaBlend = 0.3
 
@@ -69,7 +71,7 @@ class LoadQt(QMainWindow):
         self.FiltExtent = False
 
         # create some properties
-        self.fileName = ""  # filename of currenty loaded Image
+        self.fileName = ""  # filename of currently loaded Image
         self.fileExt = None  # File extension of currently loaded image
         self.filePath = None  # File Path of currently loaded image
         self.folderPath = None
@@ -92,6 +94,11 @@ class LoadQt(QMainWindow):
         self.roiData = None  # Data from Roi: Selected from image Data raw
         self.roiPoints = None  # Numpy array of points which define the ROI Polygon
         self.nStructs = "--"  # number of counted structs
+
+        # Containers for Undo functionality
+        self.maskDataCont = list()  # container for mask Data
+        self.labelDataCont = list()  # container for label Data
+        self.nStructsCont = list()  # same for number of detected structures
 
         self.wireActions()  # connect actions, buttons etc. and set default values
         self.wireButtons()
@@ -191,12 +198,16 @@ class LoadQt(QMainWindow):
     def wireViewers(self):
         self.viewerFeedback.photoClicked.connect(self.viewerSlotClicked)
         self.viewerProcess.photoClicked.connect(self.viewerSlotClicked)
-        self.viewerFeedback.photoHitButton.connect(self.doRoiToolPoly)
 
         self.viewerFeedback.photoClickedReleased.connect(
             self.viewerSlotClickedReleased)
         self.viewerProcess.photoClickedReleased.connect(
             self.viewerSlotClickedReleased)
+
+        self.viewerFeedback.photoHitButton.connect(self.doRoiToolPoly)
+
+        self.viewerFeedback.photoUndoButton.connect(self.retrieveDataState)
+        self.viewerProcess.photoUndoButton.connect(self.retrieveDataState)
 
     def wireFileBrowser(self):
         self.fileModel = QtWidgets.QFileSystemModel()
@@ -310,6 +321,7 @@ class LoadQt(QMainWindow):
             self.nStructs = "--"
 
             self.setBottomLabel()  # set bottom label txt
+            self.clearDataHistory()  # Clear Undo history
 
     def displayImage(self, ImageData, display, fitView=True, colorspace="grayscale"):
         """ Converts openCv imported Data to QImage and sets it as pixmap in the image Label """
@@ -390,13 +402,13 @@ class LoadQt(QMainWindow):
 
         upper_contrast_val = self.contrastTransformSlider_1.value()
         lower_contrast_val = self.contrastTransformSlider_2.value()
-        
-        if np.all(self.roiData == None): #if no roi is selected use Raw image data for processing
+
+        if np.all(self.roiData == None):  # if no roi is selected use Raw image data for processing
             cv2.intensity_transform.contrastStretching(
                 self.imageDataRaw, self.imageDataProcess, lower_contrast_val, 0, upper_contrast_val, 255)
-        else: #if roi Data is selecte use data from Roi for further processing
+        else:  # if roi Data is selecte use data from Roi for further processing
             cv2.intensity_transform.contrastStretching(
-                self.roiData, self.imageDataProcess, lower_contrast_val, 0, upper_contrast_val, 255)  ###hight error potential !!
+                self.roiData, self.imageDataProcess, lower_contrast_val, 0, upper_contrast_val, 255)  # hight error potential !!
 
         self.displayImage(self.imageDataProcess, display="both", fitView=False)
         self.setBottomLabel()
@@ -451,6 +463,9 @@ class LoadQt(QMainWindow):
                           fitView=False)  # display image on process side
         self.doVisualFeedback()
         self.setBottomLabel()
+
+        self.clearDataHistory()  # clear old Data history
+        self.storeDataState()  # store Data in history for Undo functionality
 
     def doVisualFeedback(self):
         """creates overlay of imageDataProcess (contrast transformed image) and mask. The two images are blended together and displayed on the feedback viewer"""
@@ -571,7 +586,6 @@ class LoadQt(QMainWindow):
         """recieves mouse press and release coordinate from the currently clicked viewer. This slot is for tools which need 1 click and 1 release coordinate"""
         if self.activeTool == "roi":
             pass
-            #self.doRoiTool(press_point, release_point)
 
         elif self.activeTool == "cut":
 
@@ -604,8 +618,7 @@ class LoadQt(QMainWindow):
             # calculate bounding rectangle for cropping the image
             bounding_rect = cv2.boundingRect(cvpoints)
 
-            roiData = masked_image[bounding_rect[1]: bounding_rect[1] + bounding_rect[3], bounding_rect[0]
-                : bounding_rect[0] + bounding_rect[2]].copy()  # cropp image to appropriate size
+            roiData = masked_image[bounding_rect[1]: bounding_rect[1] + bounding_rect[3], bounding_rect[0]: bounding_rect[0] + bounding_rect[2]].copy()  # cropp image to appropriate size
 
             # check if roi selection has shape dimension 2 and non zero dimension
             if np.all(roiData.shape) != 0 and len(roiData.shape) == 2:
@@ -669,7 +682,6 @@ class LoadQt(QMainWindow):
 
         # draw line with black color over mask data --> setting the zeros in the mask to zero :)
         cv2.line(self.maskData, pp, rp, 0, thickness=1, lineType=4, shift=0)
-
         # recalculate connected components of the cutted mask
         n_labels, label_matrix = cv2.connectedComponents(
             self.maskData, connectivity=self.connectivity)
@@ -681,6 +693,7 @@ class LoadQt(QMainWindow):
         self.displayImage(self.maskData, display="process", fitView=False)
         self.doVisualFeedback()
         self.setBottomLabel()
+        self.storeDataState()  # create history entry for Undo functionality
 
     def doEraseTool(self, press_point):
         """Choses point in mask Data and sets points with the same label to Zero"""
@@ -711,6 +724,57 @@ class LoadQt(QMainWindow):
                           fitView=False)  # display new mask
         self.doVisualFeedback()  # do visual feedback of new mask Data
         self.setBottomLabel()  # update bottom label
+        self.storeDataState()  # create history entry for Undo functionality
+
+    def storeDataState(self):
+        """Function implementation for storing the current State of Cut and Erase Tool. Necessary for an Undo functionality"""
+
+        if len(self.maskDataCont) != 0 and len(self.labelDataCont) != 0 and len(self.nStructsCont) != 0:
+            # if the Data hasn't changed don't store it in Data history (avoids that clicking with erase and cut makes redundant History)
+            if (np.all(self.maskDataCont[-1] == self.maskData) and np.all(self.labelDataCont[-1] == self.labelData) and (self.nStructsCont[-1] == self.nStructs)):
+                return
+
+        # append copy of current Data to storing container (list)
+        self.maskDataCont.append(self.maskData.copy())
+        self.labelDataCont.append(self.labelData.copy())
+        self.nStructsCont.append(self.nStructs)
+
+        # if storing list len exceeds maximum number of undos delete the first (oldest) element in the history
+        if len(self.maskDataCont) > self.maxUndos and len(self.labelDataCont) > self.maxUndos and len(self.nStructsCont) > self.maxUndos:
+            self.maskDataCont.pop(0)
+            self.labelDataCont.pop(0)
+            self.nStructsCont.pop(0)
+
+    def retrieveDataState(self):
+        """Function implementation for an Undo functionality. """
+
+        # len of Data container is 0 the Undo Functionalty should do nothing because the history is empty.
+        if (len(self.maskDataCont) == 0 or len(self.maskDataCont) == 1) and (len(self.labelDataCont) == 0 or len(self.labelDataCont) == 1) and (len(self.nStructsCont) == 0 or len(self.nStructsCont) == 1):
+            return
+
+        # if history has proper length of 2 the undo functionality can be used
+        else:
+            # old Data element from history
+            self.maskData = self.maskDataCont[-2].copy()
+            self.labelData = self.labelDataCont[-2].copy()
+            self.nStructs = self.nStructsCont[-2]
+
+            # Delete newest entry from list: selected element is now last history entry.
+            self.maskDataCont.pop()
+            self.labelDataCont.pop()
+            self.nStructsCont.pop()
+
+            # set display and all the other stuff
+            self.displayImage(self.maskData, display="process",
+                              fitView=False)  # display  mask
+            self.doVisualFeedback()  # do visual feedback of new mask Data
+            self.setBottomLabel()  # update bottom label
+
+    def clearDataHistory(self):
+        """Function for clearing the storing containers of the Data history. Necessary for loading actions to start with a fresh History"""
+        self.maskDataCont.clear()
+        self.labelDataCont.clear()
+        self.nStructsCont.clear()
 
 
 # Launch app

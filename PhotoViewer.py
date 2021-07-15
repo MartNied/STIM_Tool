@@ -7,6 +7,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
     photoClicked = QtCore.pyqtSignal(QtCore.QPoint)
     photoClickedReleased = QtCore.pyqtSignal(QtCore.QPoint, QtCore.QPoint)
     photoHitButton = QtCore.pyqtSignal(list)
+    photoUndoButton = QtCore.pyqtSignal()
 
     def __init__(self, parent):
         super(PhotoViewer, self).__init__(parent)
@@ -160,5 +161,10 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                     self._polygon_item.removeAllPoints()
                     self.photoHitButton.emit(self._polygon_item.m_points)
                     self._roimode = "active"
+
+            if self._modifiable and (self._tool == "cut" or self._tool == "erase"):
+                if event.key() == QtCore.Qt.Key_Backspace:
+                    self.photoUndoButton.emit()
+
 
         super(PhotoViewer, self).keyPressEvent(event)

@@ -1,10 +1,14 @@
+# Done
+
 ROI selector should be a Polygon (done) - additional try getting the thing movable
 
 Hide ROI annotation if oder mode is selected (done)
 
 Length Filter (done)
 
-Undo Function
+Undo Function for Cut and Scissor Tool (done)
+
+# Open Tasks
 
 do measurement - write single csv for each selection 
 
