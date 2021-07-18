@@ -10,8 +10,9 @@ import os
 import cv2
 import numpy as np
 import functools
+import csv
 from PhotoViewer import PhotoViewer
-from ImageFunctions import contrast_cut, cc_filter_idx
+from ImageFunctions import contrast_cut, cc_filter_idx, cc_measurement
 
 
 class LoadQt(QMainWindow):
@@ -42,6 +43,7 @@ class LoadQt(QMainWindow):
         self.viewerProcess.setMinimumSize(160, 90)
 
         self.displayLayout.update()
+
 
         # create and set default settings of the app
         self.colorspace = 0  # zero means grayscale: opencv --> imread() --> grayscaleflag = 0
@@ -117,13 +119,12 @@ class LoadQt(QMainWindow):
         # display bottom label
         self.setBottomLabel()
 
-        #set some inital layout things if no image was loaded
+        # set some inital layout things if no image was loaded
         self.filterGroupBox.setEnabled(False)
         self.maskGroupBox.setEnabled(False)
         self.roiGroupBox.setEnabled(False)
         self.contrastTransformGroupBox.setEnabled(False)
-        
-        
+
         # Wire functions to widgets and set default values !!!
 
     def wireActions(self):
@@ -146,6 +147,7 @@ class LoadQt(QMainWindow):
         self.undoMaskButton.clicked.connect(self.undoMasking)
         self.saveRoiButton.clicked.connect(
             functools.partial(self.saveImage, datafrom="roiData"))
+        self.doMeasurementButton.clicked.connect(self.doMeasurement)
 
     def wireSliders(self):
         # set default values
@@ -320,9 +322,10 @@ class LoadQt(QMainWindow):
                 return
 
             # set Data to imported Image
-            self.imageDataTrans = np.copy(self.imageDataRaw) # create copy of image Data raw that cv2.contrastStretch return array  value and not None
+            # create copy of image Data raw that cv2.contrastStretch return array  value and not None
+            self.imageDataTrans = np.copy(self.imageDataRaw)
 
-            # set widget status to begin state when image is loaded 
+            # set widget status to begin state when image is loaded
 
             self.contrastTransformSlider_1.setValue(
                 self.contrastTransformSlider_1Default)
@@ -332,15 +335,13 @@ class LoadQt(QMainWindow):
             self.contrastTransformGroupBox.setEnabled(True)
             self.filterGroupBox.setEnabled(True)
 
-            
             # reset some attributes to None
             self.labelData = None
             self.maskData = None
             self.roiData = None
             self.imageDataFeedback = None
             self.nStructs = "--"
-            
-            
+
             self.toolBar.setEnabled(True)
             self.toolSelector()
             self.setBottomLabel()  # set bottom label txt
@@ -441,16 +442,18 @@ class LoadQt(QMainWindow):
         self.setBottomLabel()  # update bottom label for different slider positions
 
     def doContrastTransform(self):
-        
+
         self.contrastTransform()
-        
+
         if self.activeTool == "roi":
-            self.displayImage(self.imageDataTrans, display="feedback", fitView=False)
-            self.displayImage(self.imageDataProcess, display="process", fitView=False)
+            self.displayImage(self.imageDataTrans,
+                              display="feedback", fitView=False)
+            self.displayImage(self.imageDataProcess,
+                              display="process", fitView=False)
 
         else:
             self.displayImage(self.imageDataProcess, display="both")
-    
+
     def doMasking(self):
         """creates mask from image Data process (contrast transformed image). First an adapative threshold method is used and afterwards the mask is filtered with by the function cc_filter_idx. From the filtered labels a filtered mask is calculated and displayed"""
         if np.all(self.imageDataProcess == None):  # check if image was loaded
@@ -534,7 +537,7 @@ class LoadQt(QMainWindow):
         self.contrastTransformGroupBox.setEnabled(True)
         self.doMeasurementButton.setEnabled(False)
         self.undoMaskButton.setEnabled(False)
-    
+
     def setBottomLabel(self):
         "creates a string which is displayed in the bottom laybel for user information"
         dispStr = " File: " + self.fileName + "       Lower Th: " + str(self.contrastTransformSlider_2.value()) + "       Upper Th: " + str(
@@ -543,17 +546,19 @@ class LoadQt(QMainWindow):
 
     def toolSelector(self, selected_tool="roi"):
         """sets tool attribute of Photoviewer so that the correct tool from the Toolbar is selected"""
-        
-        #switch block for controlling fit screen functionality of displayImage function!
-        if self.activeTool == "cut" and (selected_tool == "cut" or  selected_tool == "erase"): # if a direct switch between cut and erase tool happens  the display function will not fit to the screen (avoids popping around)
+
+        # switch block for controlling fit screen functionality of displayImage function!
+        # if a direct switch between cut and erase tool happens  the display function will not fit to the screen (avoids popping around)
+        if self.activeTool == "cut" and (selected_tool == "cut" or selected_tool == "erase"):
             fitCutErase = False
-        elif self.activeTool == "erase" and(selected_tool == "cut" or selected_tool == "erase"):
+        elif self.activeTool == "erase" and (selected_tool == "cut" or selected_tool == "erase"):
             fitCutErase = False
         else:
             fitCutErase = True
 
         # Selection of tool
-        self.activeTool = selected_tool  # set attribute for current tool (drag, roi, cut, erase)
+        # set attribute for current tool (drag, roi, cut, erase)
+        self.activeTool = selected_tool
 
         self.setBottomLabel()  # set bottom label to correct tool which is currently selected
 
@@ -571,7 +576,6 @@ class LoadQt(QMainWindow):
             self.cutAction.setChecked(False)
             self.eraseAction.setChecked(False)
 
-
         elif selected_tool == "roi":
             self.dragAction.setChecked(False)
             self.roiAction.setChecked(True)
@@ -581,6 +585,7 @@ class LoadQt(QMainWindow):
             self.undoMasking()
 
             self.maskGroupBox.setEnabled(False)
+            self.roiGroupBox.setEnabled(True)
 
             self.viewerFeedback._modifiable = True
             self.viewerProcess._modifiable = False
@@ -599,17 +604,19 @@ class LoadQt(QMainWindow):
             self.eraseAction.setChecked(False)
 
             self.maskGroupBox.setEnabled(True)
+            self.roiGroupBox.setEnabled(False)
 
             self.viewerFeedback._modifiable = True
             self.viewerProcess._modifiable = True
-            
+
             if self.imageDataFeedback is None and self.maskData is None:
-                self.displayImage(self.imageDataProcess, display="both", fitView = fitCutErase)
+                self.displayImage(self.imageDataProcess,
+                                  display="both", fitView=fitCutErase)
             else:
                 self.displayImage(
-                    self.imageDataFeedback, display="feedback", fitView = fitCutErase, colorspace="rgb")
+                    self.imageDataFeedback, display="feedback", fitView=fitCutErase, colorspace="rgb")
                 self.displayImage(
-                    self.maskData, display="process", fitView = fitCutErase)
+                    self.maskData, display="process", fitView=fitCutErase)
 
         elif selected_tool == "erase":
             self.dragAction.setChecked(False)
@@ -618,17 +625,19 @@ class LoadQt(QMainWindow):
             self.eraseAction.setChecked(True)
 
             self.maskGroupBox.setEnabled(True)
+            self.roiGroupBox.setEnabled(False)
 
             self.viewerFeedback._modifiable = True
             self.viewerFeedback._modifiable = True
 
             if self.imageDataFeedback is None and self.maskData is None:
-                self.displayImage(self.imageDataProcess, display="both", fitView = fitCutErase)
+                self.displayImage(self.imageDataProcess,
+                                  display="both", fitView=fitCutErase)
             else:
                 self.displayImage(
-                    self.imageDataFeedback, display="feedback", fitView = fitCutErase, colorspace="rgb")
+                    self.imageDataFeedback, display="feedback", fitView=fitCutErase, colorspace="rgb")
                 self.displayImage(
-                    self.maskData, display="process", fitView = fitCutErase)
+                    self.maskData, display="process", fitView=fitCutErase)
 
     def viewerSlotClicked(self, press_point):
         """recieves mouse press coordinate from the currently clicked viewer. This slot is for tools which just need 1 click"""
@@ -689,10 +698,12 @@ class LoadQt(QMainWindow):
                 setattr(self, "roiPoints", cvpoints)
                 self.imageDataProcess = self.roiData.copy()  # copy roi data to process data
                 self.contrastTransform()  # apply contrast transform
-                self.displayImage(self.imageDataProcess, display="process", fitView=True)
+                self.displayImage(self.imageDataProcess,
+                                  display="process", fitView=True)
 
         else:  # if list of roi points is empty
-            self.displayImage(self.imageDataTrans, display="both", fitView=True)
+            self.displayImage(self.imageDataTrans,
+                              display="both", fitView=True)
             # set attribute for accessing the roi data by other routines
             setattr(self, "roiData", None)
             # set roiPoints to numpy array containing the corners of the polygon
@@ -834,9 +845,41 @@ class LoadQt(QMainWindow):
         self.labelDataCont.clear()
         self.nStructsCont.clear()
 
+    def doMeasurement(self):
+        """Using current mask data for measurement and write to a .csv File"""
+        
+        #Create measurement
+        output_cc = cv2.connectedComponentsWithStats(
+            self.maskData, connectivity=self.connectivity)  # calculate connected components from current mask Data
+
+        dict_data, labels = cc_measurement(output_cc)
+
+        csv_columns = ["Label", "Area", "Length",
+                       "Eccentricity", "Solidity", "Extent"]
+
+        
+        
+        #Write measurement Data to csv
+        csv_file = "measurement_test.csv"
+
+        try:
+            with open(csv_file, 'w') as csvfile:
+                writer = csv.DictWriter(csvfile, fieldnames=csv_columns, lineterminator = "\n")
+                writer.writeheader()
+                for data in dict_data:
+                    writer.writerow(data)
+        except IOError:
+            QMessageBox.information(
+                self, "Error writing CSV", "Could not write measurement.csv")
+            return
+
+        #Write Labelmatrix to csv
+        np.savetxt("label_test.csv", labels, delimiter=",")
+        #Mask Data
 
 # Launch app
 def main():
+
     app = QApplication(sys.argv)
     win = LoadQt()
     win.show()

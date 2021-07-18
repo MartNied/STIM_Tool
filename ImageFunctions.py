@@ -1,6 +1,7 @@
 from os import stat
 import cv2
 import numpy as np
+from numpy.lib.function_base import sort_complex
 
 
 ############ function implementations #######################
@@ -257,6 +258,79 @@ def apply_filt_idx_stat(filt_idx, filt_idx_stat):
 
     else:
         return filt_idx[filt_idx_stat]  # else return filtered index array
+
+
+def cc_measurement(output_cc):
+    """Function for calculatiation a total measusurement of connected components output"""
+    
+    n_labels = output_cc[0]  # conneceted components number of labels
+    labels = output_cc[1] #label matrix
+    stats = output_cc[2]
+    
+    data_dict = list() #create list for storing the row entries of the measurement.csv file
+
+    for i in range(1, n_labels):  # iterate over labels and ignoring 0 label (background)
+
+        # create uint8 binary image mask for connected component with label (index) i
+        struct_mask = ((labels == i)*255).astype("uint8")
+        # calculate outer contours of struct mask
+        contour, _ = cv2.findContours(
+            struct_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+
+        
+        #############       calculate measureands       #######################
+        #area
+        area = stats[i, cv2.CC_STAT_AREA]
+        #length
+        rect = cv2.minAreaRect(contour[0]) # min enclosing rectangle
+        max_side = np.max(rect[1]) # save max side
+        length = max_side   #save as length
+
+        #eccentricity
+        if contour[0].shape[0] > 5:
+            # Danger 5 points are required for fitting an ellipse !!
+            ellipse = cv2.fitEllipse(contour[0])
+            # store big and small (a,b) semiaxis of the ellipse
+            a = np.max(ellipse[1])
+            b = np.min(ellipse[1])
+
+        # Alternate form using rotated minimum enclosing rectangle
+        else:
+            # store big and small (a,b) side of the minimum enclosing rectangle
+            a = np.max(rect[1])
+            b = np.min(rect[1])
+
+        # if avoid division by zero in eccentriciy formula (see else statement)
+        if a == 0:
+            eccentricity = 0.0
+        else:
+            eccentricity = np.sqrt(1-(b**2 / a**2))
+
+        
+        #solidity
+        hull = cv2.convexHull(contour[0])
+        hull_area = cv2.contourArea(hull)
+
+        if np.logical_or(area == 0, hull_area == 0):  # avoid division by zero error
+            solidity = 1.0
+        else:
+            solidity = float(area)/hull_area
+
+        
+        #extent
+        a = rect[1][0]  # store (a,b) side of the minimum enclosing rectangle
+        b = rect[1][1]
+
+        rect_area = a * b
+
+        if np.logical_or(area == 0, rect_area == 0):  # avoid division by zero error
+            extent = 1.0
+        else:
+            extent = float(area)/rect_area
+        
+        data_dict.append({"Label" : i, "Area" : area, "Length": length, "Eccentricity" : eccentricity, "Solidity" : solidity, "Extent" : extent})
+        
+    return data_dict, labels
 
 
 ###############                         Line Iterator           ######################
