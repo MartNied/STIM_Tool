@@ -1,12 +1,17 @@
 # Done
 
-ROI selector should be a Polygon (done) - additional try getting the thing movable
+ROI selector should be a Polygon (done)
 
 Hide ROI annotation if oder mode is selected (done)
 
 Length Filter (done)
 
 Undo Function for Cut and Scissor Tool (done)
+
+Slider should be set to defaults value (done)
+
+Setting Default Vals: Area: min 5, max 300, Lower TH: 23, Upper TH 36 (done)
+
 
 # Open Tasks
 
@@ -16,8 +21,6 @@ create report file
 
 Save selection and correpsonding images when doing measurement
 
-Slider should be set to defaults value
+select savepath for measurements like selection of open path 
 
-upper th arrowskeys in wrong direction
 
-Setting Default Vals: Area: min 5, max 300, Lower TH: 23, Upper TH 36

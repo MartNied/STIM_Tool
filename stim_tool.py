@@ -54,8 +54,9 @@ class LoadQt(QMainWindow):
         # alpha value for blending mask over process images (see doVisualFeedback function)
         self.alphaBlend = 0.3
 
+        # filter default settings
         self.FiltMinArea = 5
-        self.FiltMaxArea = 100  # 361920 max resolution
+        self.FiltMaxArea = 300  # 361920 max resolution
         self.FiltMinLength = 0
         self.FiltMaxLength = 1000
         self.FiltMinEccentricity = 0.0
@@ -70,12 +71,16 @@ class LoadQt(QMainWindow):
         self.FiltSolidity = False
         self.FiltExtent = False
 
+        # default values for Contrast sliders
+        self.contrastTransformSlider_1Default = 36
+        self.contrastTransformSlider_2Default = 23
+
         # create some properties
         self.fileName = ""  # filename of currently loaded Image
         self.fileExt = None  # File extension of currently loaded image
         self.filePath = None  # File Path of currently loaded image
         self.folderPath = None
-        self.activeTool = "drag"
+        self.activeTool = "roi"
 
         # Array with all filenames which are consideres for the current session
         self.SessionFileNames = None
@@ -85,8 +90,10 @@ class LoadQt(QMainWindow):
         self.pixmapProcess = None     # Same for Mask image on the left side
 
         # Data of image file which is currently loaded (if tiff --> normalization and conversion too 8 bit grayscale)
-        self.imageDataRaw = None
-        self.imageDataFeedback = None  # Data of image on the left positioned feedback viewer
+        self.imageDataRaw = None  # raw imported Data from the input dialog
+        self.imageDataTrans = None  # contrast transformed Raw input Data
+        # feedback data: overlay of Mask with contrast strechted Input Image
+        self.imageDataFeedback = None
         # Data of image on the right positioned processing viewer
         self.imageDataProcess = None
         self.labelData = None  # Label Matrix for corresponding mask Data
@@ -110,6 +117,13 @@ class LoadQt(QMainWindow):
         # display bottom label
         self.setBottomLabel()
 
+        #set some inital layout things if no image was loaded
+        self.filterGroupBox.setEnabled(False)
+        self.maskGroupBox.setEnabled(False)
+        self.roiGroupBox.setEnabled(False)
+        self.contrastTransformGroupBox.setEnabled(False)
+        
+        
         # Wire functions to widgets and set default values !!!
 
     def wireActions(self):
@@ -134,10 +148,17 @@ class LoadQt(QMainWindow):
             functools.partial(self.saveImage, datafrom="roiData"))
 
     def wireSliders(self):
+        # set default values
+        self.contrastTransformSlider_1.setValue(
+            self.contrastTransformSlider_1Default)
+        self.contrastTransformSlider_2.setValue(
+            self.contrastTransformSlider_2Default)
+
+        # wiring the slider
         self.contrastTransformSlider_1.valueChanged.connect(
-            self.contrastTransform)
+            self.doContrastTransform)
         self.contrastTransformSlider_2.valueChanged.connect(
-            self.contrastTransform)
+            self.doContrastTransform)
 
     def wireCheckBoxes(self):
         # set default values
@@ -299,29 +320,38 @@ class LoadQt(QMainWindow):
                 return
 
             # set Data to imported Image
-            self.imageDataProcess = np.copy(self.imageDataRaw)
+            self.imageDataTrans = np.copy(self.imageDataRaw) # create copy of image Data raw that cv2.contrastStretch return array  value and not None
 
-            # set slider and buttons enables status
+            # set widget status to begin state when image is loaded 
 
-            self.contrastTransformSlider_1.setValue(255)
-            self.contrastTransformSlider_2.setValue(0)
+            self.contrastTransformSlider_1.setValue(
+                self.contrastTransformSlider_1Default)
+            self.contrastTransformSlider_2.setValue(
+                self.contrastTransformSlider_2Default)
 
-            self.contrastTransformSlider_1.setEnabled(True)
-            self.contrastTransformSlider_2.setEnabled(True)
-            self.doMeasurementButton.setEnabled(False)
+            self.contrastTransformGroupBox.setEnabled(True)
+            self.filterGroupBox.setEnabled(True)
 
-            # display raw data on both viewers
-            self.displayImage(self.imageDataRaw, display="both")
-
-            # set some attributes to None
+            
+            # reset some attributes to None
             self.labelData = None
             self.maskData = None
             self.roiData = None
             self.imageDataFeedback = None
             self.nStructs = "--"
-
+            
+            
+            self.toolBar.setEnabled(True)
+            self.toolSelector()
             self.setBottomLabel()  # set bottom label txt
             self.clearDataHistory()  # Clear Undo history
+            # remove ROI annotation if image is loaded
+            self.viewerFeedback._polygon_item.removeAllPoints()
+            # set roimode to active (see PhotoViewer class) to be able to draw a Polygon
+            self.viewerFeedback._roimode = "active"
+            # display contrast transformed data on both viewers
+            self.contrastTransform()  # do contrast transform and store it in self.imageDataProcess
+            self.displayImage(self.imageDataProcess, display="both")
 
     def displayImage(self, ImageData, display, fitView=True, colorspace="grayscale"):
         """ Converts openCv imported Data to QImage and sets it as pixmap in the image Label """
@@ -394,25 +424,33 @@ class LoadQt(QMainWindow):
                     return
 
     def contrastTransform(self):
-        if np.all(self.imageDataProcess == None):  # check if image was loaded
-            QMessageBox.information(
-                self, "Error processing Image", "No image was loaded!")
-
-            return
 
         upper_contrast_val = self.contrastTransformSlider_1.value()
         lower_contrast_val = self.contrastTransformSlider_2.value()
 
-        if np.all(self.roiData == None):  # if no roi is selected use Raw image data for processing
-            cv2.intensity_transform.contrastStretching(
-                self.imageDataRaw, self.imageDataProcess, lower_contrast_val, 0, upper_contrast_val, 255)
+        # calculate contrast transformed image from raw image data
+        cv2.intensity_transform.contrastStretching(
+            self.imageDataRaw, self.imageDataTrans, lower_contrast_val, 0, upper_contrast_val, 255)
+
+        # if no roi is selected use transformed Raw image data for processing
+        if np.all(self.roiData == None):
+            self.imageDataProcess = self.imageDataTrans.copy()
         else:  # if roi Data is selecte use data from Roi for further processing
             cv2.intensity_transform.contrastStretching(
-                self.roiData, self.imageDataProcess, lower_contrast_val, 0, upper_contrast_val, 255)  # hight error potential !!
+                self.roiData, self.imageDataProcess, lower_contrast_val, 0, upper_contrast_val, 255)  # do the intensity transform
+        self.setBottomLabel()  # update bottom label for different slider positions
 
-        self.displayImage(self.imageDataProcess, display="both", fitView=False)
-        self.setBottomLabel()
+    def doContrastTransform(self):
+        
+        self.contrastTransform()
+        
+        if self.activeTool == "roi":
+            self.displayImage(self.imageDataTrans, display="feedback", fitView=False)
+            self.displayImage(self.imageDataProcess, display="process", fitView=False)
 
+        else:
+            self.displayImage(self.imageDataProcess, display="both")
+    
     def doMasking(self):
         """creates mask from image Data process (contrast transformed image). First an adapative threshold method is used and afterwards the mask is filtered with by the function cc_filter_idx. From the filtered labels a filtered mask is calculated and displayed"""
         if np.all(self.imageDataProcess == None):  # check if image was loaded
@@ -456,8 +494,9 @@ class LoadQt(QMainWindow):
 
         # set some settings after masking
 
-        self.contrastTransformSlider_1.setEnabled(False)
-        self.contrastTransformSlider_2.setEnabled(False)
+        self.contrastTransformGroupBox.setEnabled(False)
+        self.doMeasurementButton.setEnabled(True)
+        self.undoMaskButton.setEnabled(True)
 
         self.displayImage(self.maskData, display="process",
                           fitView=False)  # display image on process side
@@ -486,30 +525,34 @@ class LoadQt(QMainWindow):
     def undoMasking(self):
         """reseting the overlay of mask and image Data to normal View"""
 
-        if np.all(self.imageDataProcess == None):  # check if image was loaded
-            QMessageBox.information(
-                self, "Error processing Image", "No image was loaded!")
-
-            return
-
-        self.contrastTransformSlider_1.setEnabled(True)
-        self.contrastTransformSlider_2.setEnabled(True)
-
-        self.displayImage(self.imageDataProcess, display="both", fitView=False)
+        self.displayImage(self.imageDataProcess, display="both", fitView=True)
         self.nStructs = "--"  # set bottom label struct count
         self.setBottomLabel()
         self.imageDataFeedback = None
         self.maskData = None
         self.labelData = None
-
+        self.contrastTransformGroupBox.setEnabled(True)
+        self.doMeasurementButton.setEnabled(False)
+        self.undoMaskButton.setEnabled(False)
+    
     def setBottomLabel(self):
         "creates a string which is displayed in the bottom laybel for user information"
         dispStr = " File: " + self.fileName + "       Lower Th: " + str(self.contrastTransformSlider_2.value()) + "       Upper Th: " + str(
             self.contrastTransformSlider_1.value()) + "        Struct count: " + str(self.nStructs) + "        Interaction Mode: " + self.activeTool
         self.bottomLabel.setText(dispStr)
 
-    def toolSelector(self, selected_tool="drag"):
+    def toolSelector(self, selected_tool="roi"):
         """sets tool attribute of Photoviewer so that the correct tool from the Toolbar is selected"""
+        
+        #switch block for controlling fit screen functionality of displayImage function!
+        if self.activeTool == "cut" and (selected_tool == "cut" or  selected_tool == "erase"): # if a direct switch between cut and erase tool happens  the display function will not fit to the screen (avoids popping around)
+            fitCutErase = False
+        elif self.activeTool == "erase" and(selected_tool == "cut" or selected_tool == "erase"):
+            fitCutErase = False
+        else:
+            fitCutErase = True
+
+        # Selection of tool
         self.activeTool = selected_tool  # set attribute for current tool (drag, roi, cut, erase)
 
         self.setBottomLabel()  # set bottom label to correct tool which is currently selected
@@ -528,17 +571,26 @@ class LoadQt(QMainWindow):
             self.cutAction.setChecked(False)
             self.eraseAction.setChecked(False)
 
+
         elif selected_tool == "roi":
             self.dragAction.setChecked(False)
             self.roiAction.setChecked(True)
             self.cutAction.setChecked(False)
             self.eraseAction.setChecked(False)
 
+            self.undoMasking()
+
+            self.maskGroupBox.setEnabled(False)
+
             self.viewerFeedback._modifiable = True
             self.viewerProcess._modifiable = False
 
-            self.displayImage(self.imageDataRaw, display="feedback")
-            self.displayImage(self.roiData, display="process")
+            # if no roi is selected use Raw contstrast transoimage data for processing
+            if np.all(self.roiData == None):
+                self.displayImage(self.imageDataTrans, display="both")
+            else:  # if roi Data is selecte use data from Roi for further processing
+                self.displayImage(self.imageDataTrans, display="feedback")
+                self.displayImage(self.imageDataProcess, display="process")
 
         elif selected_tool == "cut":
             self.dragAction.setChecked(False)
@@ -546,16 +598,18 @@ class LoadQt(QMainWindow):
             self.cutAction.setChecked(True)
             self.eraseAction.setChecked(False)
 
+            self.maskGroupBox.setEnabled(True)
+
             self.viewerFeedback._modifiable = True
             self.viewerProcess._modifiable = True
-
+            
             if self.imageDataFeedback is None and self.maskData is None:
-                self.displayImage(self.imageDataProcess, display="both")
+                self.displayImage(self.imageDataProcess, display="both", fitView = fitCutErase)
             else:
                 self.displayImage(
-                    self.imageDataFeedback, display="feedback", fitView=False, colorspace="rgb")
+                    self.imageDataFeedback, display="feedback", fitView = fitCutErase, colorspace="rgb")
                 self.displayImage(
-                    self.maskData, display="process", fitView=False)
+                    self.maskData, display="process", fitView = fitCutErase)
 
         elif selected_tool == "erase":
             self.dragAction.setChecked(False)
@@ -563,16 +617,18 @@ class LoadQt(QMainWindow):
             self.cutAction.setChecked(False)
             self.eraseAction.setChecked(True)
 
+            self.maskGroupBox.setEnabled(True)
+
             self.viewerFeedback._modifiable = True
             self.viewerFeedback._modifiable = True
 
             if self.imageDataFeedback is None and self.maskData is None:
-                self.displayImage(self.imageDataProcess, display="both")
+                self.displayImage(self.imageDataProcess, display="both", fitView = fitCutErase)
             else:
                 self.displayImage(
-                    self.imageDataFeedback, display="feedback", fitView=False, colorspace="rgb")
+                    self.imageDataFeedback, display="feedback", fitView = fitCutErase, colorspace="rgb")
                 self.displayImage(
-                    self.maskData, display="process", fitView=False)
+                    self.maskData, display="process", fitView = fitCutErase)
 
     def viewerSlotClicked(self, press_point):
         """recieves mouse press coordinate from the currently clicked viewer. This slot is for tools which just need 1 click"""
@@ -618,7 +674,7 @@ class LoadQt(QMainWindow):
             # calculate bounding rectangle for cropping the image
             bounding_rect = cv2.boundingRect(cvpoints)
 
-            roiData = masked_image[bounding_rect[1]: bounding_rect[1] + bounding_rect[3], bounding_rect[0]: bounding_rect[0] + bounding_rect[2]].copy()  # cropp image to appropriate size
+            roiData = masked_image[bounding_rect[1]: bounding_rect[1] + bounding_rect[3], bounding_rect[0]                                   : bounding_rect[0] + bounding_rect[2]].copy()  # cropp image to appropriate size
 
             # check if roi selection has shape dimension 2 and non zero dimension
             if np.all(roiData.shape) != 0 and len(roiData.shape) == 2:
@@ -631,15 +687,17 @@ class LoadQt(QMainWindow):
                 setattr(self, "roiData", roiData)
                 # set roiPoints to numpy array containing the corners of the polygon
                 setattr(self, "roiPoints", cvpoints)
-                self.imageDataProcess = self.roiData.copy()
+                self.imageDataProcess = self.roiData.copy()  # copy roi data to process data
+                self.contrastTransform()  # apply contrast transform
+                self.displayImage(self.imageDataProcess, display="process", fitView=True)
 
         else:  # if list of roi points is empty
-            self.displayImage(None, display="process", fitView=True)
+            self.displayImage(self.imageDataTrans, display="both", fitView=True)
             # set attribute for accessing the roi data by other routines
             setattr(self, "roiData", None)
             # set roiPoints to numpy array containing the corners of the polygon
             setattr(self, "roiPoints", None)
-            self.imageDataProcess = self.imageDataRaw.copy()
+            self.imageDataProcess = self.imageDataTrans.copy()
 
     def doRoiTool(self, press_point, release_point):
         """calculate roi from rawImage data and press and release points in image Viewer. This method is obsulete. In the current version doRoiTool Poly is used"""

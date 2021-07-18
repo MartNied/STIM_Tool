@@ -155,7 +155,7 @@
        </widget>
        <widget class="QWidget" name="tab_2">
         <attribute name="title">
-         <string>Measurement</string>
+         <string>Measurements</string>
         </attribute>
        </widget>
       </widget>
@@ -167,7 +167,10 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QGroupBox" name="FilterGroupBox">
+       <widget class="QGroupBox" name="filterGroupBox">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="title">
          <string>Filters</string>
         </property>
@@ -470,7 +473,10 @@
        </widget>
       </item>
       <item>
-       <widget class="QGroupBox" name="MaskGroupBox">
+       <widget class="QGroupBox" name="maskGroupBox">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -502,7 +508,7 @@
          <item row="2" column="0">
           <widget class="QPushButton" name="doMeasurementButton">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="sizePolicy">
             <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
@@ -582,6 +588,9 @@
       </item>
       <item>
        <widget class="QGroupBox" name="roiGroupBox">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="title">
          <string>ROI</string>
         </property>
@@ -589,7 +598,7 @@
          <item>
           <widget class="QPushButton" name="saveRoiButton">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="text">
             <string>Save ROI</string>
@@ -600,7 +609,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QGroupBox" name="contrastTransormGroupbox">
+       <widget class="QGroupBox" name="contrastTransformGroupBox">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -742,6 +751,9 @@
    <addaction name="menuFile"/>
   </widget>
   <widget class="QToolBar" name="toolBar">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="sizePolicy">
     <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
      <horstretch>0</horstretch>
@@ -794,6 +806,9 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset>
      <normaloff>icons/roi_icon.ico</normaloff>icons/roi_icon.ico</iconset>
@@ -802,7 +817,7 @@
     <string>RoiCrop</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+R</string>
+    <string>1</string>
    </property>
   </action>
   <action name="dragAction">
@@ -810,7 +825,7 @@
     <bool>true</bool>
    </property>
    <property name="checked">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="icon">
     <iconset>
@@ -835,7 +850,7 @@
     <string>Cut</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+C</string>
+    <string>2</string>
    </property>
   </action>
   <action name="eraseAction">
@@ -856,7 +871,7 @@
     <string>Eraser</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+E</string>
+    <string>3</string>
    </property>
   </action>
   <action name="saveRoiAction">
@@ -880,12 +895,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>77</x>
-     <y>504</y>
+     <x>126</x>
+     <y>480</y>
     </hint>
     <hint type="destinationlabel">
-     <x>170</x>
-     <y>504</y>
+     <x>209</x>
+     <y>480</y>
     </hint>
    </hints>
   </connection>
@@ -896,12 +911,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>93</x>
-     <y>504</y>
+     <x>132</x>
+     <y>480</y>
     </hint>
     <hint type="destinationlabel">
-     <x>237</x>
-     <y>504</y>
+     <x>276</x>
+     <y>480</y>
     </hint>
    </hints>
   </connection>
@@ -998,182 +1013,6 @@
     <hint type="destinationlabel">
      <x>266</x>
      <y>580</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>maskButton</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>contrastTransformSlider_1</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>403</x>
-     <y>496</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>972</x>
-     <y>497</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>undoMaskButton</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>contrastTransformSlider_1</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>403</x>
-     <y>534</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>972</x>
-     <y>497</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>maskButton</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>contrastTransformSlider_2</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>403</x>
-     <y>496</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>1127</x>
-     <y>559</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>undoMaskButton</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>contrastTransformSlider_2</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>338</x>
-     <y>531</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>1127</x>
-     <y>559</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>maskButton</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>doMeasurementButton</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>403</x>
-     <y>496</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>403</x>
-     <y>572</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>undoMaskButton</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>doMeasurementButton</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>290</x>
-     <y>529</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>403</x>
-     <y>572</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>roiAction</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>saveRoiButton</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>458</x>
-     <y>524</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>roiAction</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>FilterGroupBox</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>517</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>roiAction</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>MaskGroupBox</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>343</x>
-     <y>517</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>roiAction</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>contrastTransormGroupbox</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>837</x>
-     <y>517</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>roiAction</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>saveRoiAction</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
     </hint>
    </hints>
   </connection>
