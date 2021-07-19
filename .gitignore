@@ -3,6 +3,7 @@ test_data/
 tempCodeRunnerFile.py
 installer/STIM_TOOL Setup-cache
 installer/STIM_TOOL Setup-SetupFiles
+measurement/
 
 # VSCode
 .vscode/*

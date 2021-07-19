@@ -44,7 +44,6 @@ class LoadQt(QMainWindow):
 
         self.displayLayout.update()
 
-
         # create and set default settings of the app
         self.colorspace = 0  # zero means grayscale: opencv --> imread() --> grayscaleflag = 0
         self.clipval = 2**16  # intensity clipvalue for the import of 16bit tiff files --> they are clippend normalized and then converted to 8bit grayscale images
@@ -81,13 +80,11 @@ class LoadQt(QMainWindow):
         self.fileName = ""  # filename of currently loaded Image
         self.fileExt = None  # File extension of currently loaded image
         self.filePath = None  # File Path of currently loaded image
-        self.folderPath = None
-        self.activeTool = "roi"
+        self.folderPath = None  # Folder Path of currently opened Image
+        self.savePath = None  # Path where measurement will be saved
+        self.activeTool = "roi"  # active tool to begin with
 
-        # Array with all filenames which are consideres for the current session
-        self.SessionFileNames = None
-        self.SessionFilePaths = None
-
+        # pix map attributes
         self.pixmapFeedback = None  # Qt Pixmap of current shown Image in Feedback window
         self.pixmapProcess = None     # Same for Mask image on the left side
 
@@ -274,7 +271,7 @@ class LoadQt(QMainWindow):
         if mode == "dialog":
             options = QFileDialog.Options()
             filePath, _ = QFileDialog.getOpenFileName(self, "Open Image", "",  # open File Dialog
-                                                      "Images (*.*)", options=options)
+                                                      "Images (*.png *.jpg *.tif *.tiff)", options=options)
 
         elif mode == "browser":
             idx = self.fileTree.currentIndex()  # index of currently selected file
@@ -301,7 +298,7 @@ class LoadQt(QMainWindow):
             # needs to be adapated if non grayscale images are imported (0 flag for Grayscale images)
             if self.colorspace == 0:
 
-                image_import = cv2.imread(filePath, cv2.IMREAD_UNCHANGED)
+                image_import = cv2.imread(filePath, cv2.IMREAD_GRAYSCALE)
 
                 if self.fileExt == ".tif":  # if tif file is importet preprocess it
 
@@ -847,37 +844,138 @@ class LoadQt(QMainWindow):
 
     def doMeasurement(self):
         """Using current mask data for measurement and write to a .csv File"""
-        
-        #Create measurement
+       # create save path and folder
+        # still hardcoded path :'
+        self.savePath = "D:\\programming\\python\\STIM_Tool\\measurement\\"
+
+        # saves filename without extension
+        filename = os.path.splitext(self.fileName)[0]
+
+        count = 1
+
+        # creating a specifier for different measurements R1 for region 1
+        specifier = f"_R{count}"
+        savefoldername = filename + specifier  # create foldername
+
+        # create folder name until specifier is available. Increment R# until a name is available
+        while os.path.exists(self.savePath + savefoldername):
+            count += 1  # increment number
+            specifier = f"_R{count}"  # create specifier
+            savefoldername = filename + specifier  # create foldername
+
+        # create savepath from folder name and savePath
+        fileSavePath = self.savePath + savefoldername
+
+        try:
+            os.mkdir(fileSavePath)  # creates folder from path
+        except:
+            QMessageBox.information(
+                self, "Error creating folder", "Please Check Permissions in your Filesystem!")
+
+        # Create measurement
         output_cc = cv2.connectedComponentsWithStats(
             self.maskData, connectivity=self.connectivity)  # calculate connected components from current mask Data
 
-        dict_data, labels = cc_measurement(output_cc)
+        dict_data, labels = cc_measurement(output_cc) # calculate measurment dictionary and labels
 
-        csv_columns = ["Label", "Area", "Length",
+        csv_columns = ["Label", "Area", "Length",    # create header for csv
                        "Eccentricity", "Solidity", "Extent"]
 
-        
-        
-        #Write measurement Data to csv
-        csv_file = "measurement_test.csv"
+        # Write measurement Data to csv
+        csv_file = fileSavePath + "\\measurement_" + savefoldername + ".csv"  # create path to file
 
         try:
-            with open(csv_file, 'w') as csvfile:
-                writer = csv.DictWriter(csvfile, fieldnames=csv_columns, lineterminator = "\n")
+            with open(csv_file, 'w') as csvfile: # write data to csv
+                writer = csv.DictWriter(
+                    csvfile, fieldnames=csv_columns, lineterminator="\n")
                 writer.writeheader()
                 for data in dict_data:
                     writer.writerow(data)
         except IOError:
             QMessageBox.information(
                 self, "Error writing CSV", "Could not write measurement.csv")
-            return
 
-        #Write Labelmatrix to csv
-        np.savetxt("label_test.csv", labels, delimiter=",")
-        #Mask Data
+        # Write settings and Struct count same as aboce for other csv
+        csv_file = fileSavePath + "\\count_test" + savefoldername + ".csv"
+
+        csv_columns = ["Count", "Lower TH", "Upper TH", "Area Filter", "Min Area", "Max Area", "Length Filter", "Min Lenght", "Max Length", "Eccentricity Filter",
+                       "Min Eccentricity", "Max Eccentricity", "Solidity Filter", "Min Solidity", "Max Solidity", "Extent Filter", "Min Extent", "Max Extent"]
+
+        dict_data = [{"Count": self.nStructs, "Lower TH": self.contrastTransformSlider_2.value(), "Upper TH": self.contrastTransformSlider_1.value(), "Area Filter": self.FiltArea, "Min Area": self.FiltMinArea,  "Max Area": self.FiltMaxArea, "Length Filter": self.FiltLength, "Min Lenght": self.FiltMinLength, "Max Length": self.FiltMaxLength,
+                      "Eccentricity Filter": self.FiltEccentricity, "Min Eccentricity": self.FiltMinEccentricity, "Max Eccentricity": self.FiltMaxEccentricity, "Solidity Filter": self.FiltSolidity, "Min Solidity": self.FiltMinSolidity, "Max Solidity": self.FiltMaxSolidity, "Extent Filter": self.FiltExtent, "Min Extent": self.FiltMinExtent, "Max Extent": self.FiltMaxExtent}]
+
+        try:
+            with open(csv_file, 'w') as csvfile:
+                writer = csv.DictWriter(
+                    csvfile, fieldnames=csv_columns, lineterminator="\n")
+                writer.writeheader()
+                for data in dict_data:
+                    writer.writerow(data)
+        except IOError:
+            QMessageBox.information(
+                self, "Error writing CSV", "Could not write count.csv")
+
+        # Roi Coordinates
+        if np.all(self.roiPoints) and not np.all(self.roiPoints == None): # only write roi data if a selection was made
+            try:
+                np.savetxt(fileSavePath + "\\roiPoints_" +
+                           savefoldername + ".csv", self.roiPoints, delimiter=",")
+            except:
+                QMessageBox.information(
+                    self, "Error Saving CSV", "Cannot save roiPoints.csv")
+
+        # write image data raw to png
+        try:
+            cv2.imwrite(fileSavePath + "\\raw_" + savefoldername + ".png", self.imageDataRaw, [  # write imageData to uncompressed .png File
+                cv2.IMWRITE_PNG_COMPRESSION, 0])
+        except:
+            QMessageBox.information(
+                self, "Error Saving Image", "Cannot save raw.png")
+
+        # write roi data raw png
+
+        if not np.all(self.roiData == None):  # check if roi data was selected
+            try:
+                cv2.imwrite(fileSavePath + "\\roi_" + savefoldername + ".png", self.roiData, [  # write imageData to uncompressed .png File
+                    cv2.IMWRITE_PNG_COMPRESSION, 0])
+            except:
+                QMessageBox.information(
+                    self, "Error Saving Image", "Cannot save roi.png")
+
+        # write feedback data png
+
+        try:
+            cv2.imwrite(fileSavePath + "\\feedback_" + savefoldername + ".png", cv2.cvtColor(self.imageDataFeedback, cv2.COLOR_BGR2RGB), [  # write imageData to uncompressed .png File
+                cv2.IMWRITE_PNG_COMPRESSION, 0])
+        except:
+            QMessageBox.information(
+                self, "Error Saving Image", "Cannot save feedback.png")
+
+        # write label data to 16bit uint image!! 2^16 possible labels can be saved
+        try:
+            cv2.imwrite(fileSavePath + "\\labels_" + savefoldername + ".png", labels.astype(np.uint16), [  # write imageData to uncompressed .png File
+                cv2.IMWRITE_PNG_COMPRESSION, 0])
+
+            if self.nStructs >= 2**16:  # create message box if uint16 overflows
+                QMessageBox.information(
+                    self, "Error Saving Label Data", "Number of detected structs exceeds the max possible count of " + str(2**16))
+
+        except:
+            QMessageBox.information(
+                self, "Error Saving Image", "Cannot save labels.png")
+
+        
+        # mask data
+        try:
+            cv2.imwrite(fileSavePath + "\\mask_" + savefoldername + ".png", self.maskData, [  # write imageData to uncompressed .png File
+                cv2.IMWRITE_PNG_COMPRESSION, 0])
+        except:
+            QMessageBox.information(
+                self, "Error Saving Image", "Cannot save mask.png")
 
 # Launch app
+
+
 def main():
 
     app = QApplication(sys.argv)
