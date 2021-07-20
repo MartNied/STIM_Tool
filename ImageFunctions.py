@@ -2,7 +2,6 @@ import cv2
 import numpy as np
 
 
-
 ############ function implementations #######################
 def contrast_cut(im, clip_val, dataType="uint8"):
     """Clipping contrast values at certain threshold value
@@ -261,12 +260,19 @@ def apply_filt_idx_stat(filt_idx, filt_idx_stat):
 
 def cc_measurement(output_cc):
     """Function for calculatiation a total measusurement of connected components output"""
-    
+
     n_labels = output_cc[0]  # conneceted components number of labels
-    labels = output_cc[1] #label matrix
+    labels = output_cc[1]  # label matrix
     stats = output_cc[2]
-    
-    data_dict = list() #create list for storing the row entries of the measurement.csv file
+
+    # containers for mean and std calculation
+    area_cont = list()
+    length_cont = list()
+    eccentricity_cont = list()
+    solidity_cont = list()
+    extent_cont = list()
+
+    data_dict = list()  # create list for storing the row entries of the measurement.csv file
 
     for i in range(1, n_labels):  # iterate over labels and ignoring 0 label (background)
 
@@ -276,16 +282,15 @@ def cc_measurement(output_cc):
         contour, _ = cv2.findContours(
             struct_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
-        
         #############       calculate measureands       #######################
-        #area
+        # area
         area = stats[i, cv2.CC_STAT_AREA]
-        #length
-        rect = cv2.minAreaRect(contour[0]) # min enclosing rectangle
-        max_side = np.max(rect[1]) # save max side
-        length = max_side   #save as length
+        # length
+        rect = cv2.minAreaRect(contour[0])  # min enclosing rectangle
+        max_side = np.max(rect[1])  # save max side
+        length = max_side  # save as length
 
-        #eccentricity
+        # eccentricity
         if contour[0].shape[0] > 5:
             # Danger 5 points are required for fitting an ellipse !!
             ellipse = cv2.fitEllipse(contour[0])
@@ -305,8 +310,7 @@ def cc_measurement(output_cc):
         else:
             eccentricity = np.sqrt(1-(b**2 / a**2))
 
-        
-        #solidity
+        # solidity
         hull = cv2.convexHull(contour[0])
         hull_area = cv2.contourArea(hull)
 
@@ -315,8 +319,7 @@ def cc_measurement(output_cc):
         else:
             solidity = float(area)/hull_area
 
-        
-        #extent
+        # extent
         a = rect[1][0]  # store (a,b) side of the minimum enclosing rectangle
         b = rect[1][1]
 
@@ -326,10 +329,28 @@ def cc_measurement(output_cc):
             extent = 1.0
         else:
             extent = float(area)/rect_area
-        
-        data_dict.append({"Label" : i, "Area" : area, "Length": length, "Eccentricity" : eccentricity, "Solidity" : solidity, "Extent" : extent})
-        
-    return data_dict, labels
+
+        data_dict.append({"Label": i, "Area": area, "Length": length,
+                         "Eccentricity": eccentricity, "Solidity": solidity, "Extent": extent})
+
+        # append values to container
+        area_cont.append(area)
+        length_cont.append(length)
+        eccentricity_cont.append(eccentricity)
+        solidity_cont.append(solidity)
+        extent_cont.append(extent)
+
+    # covert contaainers to numpy array
+    area_cont = np.array(area_cont)
+    length_cont = np.array(length_cont)
+    eccentricity_cont = np.array(eccentricity_cont)
+    solidity_cont = np.array(solidity_cont)
+    extent_cont = np.array(extent_cont)
+
+    # calculate mean and std for each measurerand    
+    stats_dict = {"Area Mean": np.mean(area_cont), "Area Std": np.std(area_cont), "Length Mean": np.mean(length_cont), "Length Std": np.std(length_cont), "Eccentricity Mean": np.mean(eccentricity_cont), "Eccentricity Std": np.std(eccentricity_cont), "Solidity Mean": np.mean(solidity_cont), "Solidity Std": np.std(solidity_cont), "Extent Mean": np.mean(extent_cont), "Extent Std": np.std(extent_cont)}
+
+    return data_dict, labels, stats_dict
 
 
 ###############                         Line Iterator           ######################

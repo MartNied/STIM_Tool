@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QMessageBox,
 from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
 import sys
 import os
+import pathlib
 import cv2
 import numpy as np
 import functools
@@ -112,7 +113,7 @@ class LoadQt(QMainWindow):
         self.wireCheckBoxes()
         self.wireSpinBoxes()
         self.wireViewers()
-        self.wireFileBrowser()
+        self.wireFileBrowsers()
         # display bottom label
         self.setBottomLabel()
 
@@ -128,6 +129,9 @@ class LoadQt(QMainWindow):
         self.openAction.triggered.connect(
             functools.partial(self.openImage, "dialog"))
         self.exitAction.triggered.connect(self.close)
+        self.selectSavepathAction.triggered.connect(self.selectSavepath)
+
+        # tools in sidebar
         self.dragAction.triggered.connect(
             functools.partial(self.toolSelector, "drag"))
         self.roiAction.triggered.connect(
@@ -136,8 +140,6 @@ class LoadQt(QMainWindow):
             functools.partial(self.toolSelector, "cut"))
         self.eraseAction.triggered.connect(
             functools.partial(self.toolSelector, "erase"))
-        self.saveRoiAction.triggered.connect(
-            functools.partial(self.saveImage, datafrom="roiData"))
 
     def wireButtons(self):
         self.maskButton.clicked.connect(self.doMasking)
@@ -229,7 +231,8 @@ class LoadQt(QMainWindow):
         self.viewerFeedback.photoUndoButton.connect(self.retrieveDataState)
         self.viewerProcess.photoUndoButton.connect(self.retrieveDataState)
 
-    def wireFileBrowser(self):
+    def wireFileBrowsers(self):
+        ###### Files Tree ######
         self.fileModel = QtWidgets.QFileSystemModel()
         self.fileModel.setRootPath((QtCore.QDir.rootPath()))
 
@@ -240,18 +243,40 @@ class LoadQt(QMainWindow):
         self.fileTree.setColumnWidth(0, 250)
         self.fileTree.hide()
 
-        # self.fileTree.customContextMenuRequested.emit
         self.fileTree.customContextMenuRequested.connect(
             self.fileTreeContextMenu)
 
+        ###### Measure Tree ######
+        self.measureModel = QtWidgets.QFileSystemModel()
+        self.measureModel.setRootPath((QtCore.QDir.rootPath()))
+
+        self.measureTree.setModel(self.measureModel)
+        self.measureTree.setRootIndex(self.measureModel.index(self.savePath))
+        self.measureTree.setSortingEnabled(True)
+        self.measureTree.setColumnHidden(1, True)
+        self.measureTree.setColumnWidth(0, 250)
+        self.measureTree.hide()
+
+        self.measureTree.customContextMenuRequested.connect(self.measureTreeContextMenu)
+
     ################################################  Create Methods #############################################################
-    def fileTreeContextMenu(self, cursor_point):
+    def fileTreeContextMenu(self):
         """Creates context menu for File Browser window"""
         menu = QtWidgets.QMenu()
         open = menu.addAction("Open Image")
         open.triggered.connect(functools.partial(self.openImage, "browser"))
         cursor = QtGui.QCursor()
         menu.exec_(cursor.pos())
+    
+    def measureTreeContextMenu(self):
+        """Creates context menu for File Browser window"""
+        menu = QtWidgets.QMenu()
+        open = menu.addAction("Create Report")
+        open.triggered.connect(self.createReport)
+        cursor = QtGui.QCursor()
+        menu.exec_(cursor.pos())
+    
+
 
     def doCheckBox(self, CBox, AttributeName):
         """Checking the state of a given Check Box and changing the corresponding Attribute (must be bool). Changes self.AttributeName to (True or False)"""
@@ -268,9 +293,17 @@ class LoadQt(QMainWindow):
 
     def openImage(self, mode="dialog"):
         """Creates file dialog and sets the imported image as pixmap in in the image display label """
+        ##create default path where the file dialog starts
+        if self.folderPath == None:
+            defaultpath = pathlib.Path.home()
+        else:
+            defaultpath = self.folderPath
+            
+        ### different modes for standard dialog and file browser to read the path
+        
         if mode == "dialog":
             options = QFileDialog.Options()
-            filePath, _ = QFileDialog.getOpenFileName(self, "Open Image", "",  # open File Dialog
+            filePath, _ = QFileDialog.getOpenFileName(self, "Open Image", str(defaultpath),  # open File Dialog
                                                       "Images (*.png *.jpg *.tif *.tiff)", options=options)
 
         elif mode == "browser":
@@ -282,7 +315,7 @@ class LoadQt(QMainWindow):
             return
         else:
 
-            # do some file path oprations
+            # do some file path operations
             self.filePath = filePath  # set current file Path of image which is loaded
             # save file extension from path
             self.fileExt = os.path.splitext(filePath)[1]
@@ -680,7 +713,8 @@ class LoadQt(QMainWindow):
             # calculate bounding rectangle for cropping the image
             bounding_rect = cv2.boundingRect(cvpoints)
 
-            roiData = masked_image[bounding_rect[1]: bounding_rect[1] + bounding_rect[3], bounding_rect[0]                                   : bounding_rect[0] + bounding_rect[2]].copy()  # cropp image to appropriate size
+            roiData = masked_image[bounding_rect[1]: bounding_rect[1] + bounding_rect[3], bounding_rect[0]
+                : bounding_rect[0] + bounding_rect[2]].copy()  # cropp image to appropriate size
 
             # check if roi selection has shape dimension 2 and non zero dimension
             if np.all(roiData.shape) != 0 and len(roiData.shape) == 2:
@@ -844,9 +878,13 @@ class LoadQt(QMainWindow):
 
     def doMeasurement(self):
         """Using current mask data for measurement and write to a .csv File"""
-       # create save path and folder
-        # still hardcoded path :'
-        self.savePath = "D:\\programming\\python\\STIM_Tool\\measurement\\"
+
+        if self.savePath == None:
+            QMessageBox.information(
+                self, "Error Creating Measurement", "Select Savepath first!")
+            return
+
+        ##### create save path and folder
 
         # saves filename without extension
         filename = os.path.splitext(self.fileName)[0]
@@ -858,36 +896,38 @@ class LoadQt(QMainWindow):
         savefoldername = filename + specifier  # create foldername
 
         # create folder name until specifier is available. Increment R# until a name is available
-        while os.path.exists(self.savePath + savefoldername):
+        while os.path.exists(self.savePath / savefoldername):
             count += 1  # increment number
             specifier = f"_R{count}"  # create specifier
             savefoldername = filename + specifier  # create foldername
 
         # create savepath from folder name and savePath
-        fileSavePath = self.savePath + savefoldername
+        fileSavePath = self.savePath / savefoldername
+
 
         try:
             os.mkdir(fileSavePath)  # creates folder from path
         except:
             QMessageBox.information(
-                self, "Error creating folder", "Please Check Permissions in your Filesystem!")
+                self, "Error creating folder", "Savepath is not accessible or has been deleted!")
 
         # Create measurement
         output_cc = cv2.connectedComponentsWithStats(
             self.maskData, connectivity=self.connectivity)  # calculate connected components from current mask Data
 
-        dict_data, labels = cc_measurement(output_cc) # calculate measurment dictionary and labels
+        # calculate measurment dictionary and labels
+        dict_data, labels, stats_dict = cc_measurement(output_cc)
 
         csv_columns = ["Label", "Area", "Length",    # create header for csv
                        "Eccentricity", "Solidity", "Extent"]
 
         # Write measurement Data to csv
-        csv_file = fileSavePath + "\\measurement_" + savefoldername + ".csv"  # create path to file
+        csv_file = fileSavePath / ("measurement_" + savefoldername + ".csv")  # create path to file
 
         try:
-            with open(csv_file, 'w') as csvfile: # write data to csv
+            with open(csv_file, 'w') as csvfile:  # write data to csv
                 writer = csv.DictWriter(
-                    csvfile, fieldnames=csv_columns, lineterminator="\n")
+                    csvfile, fieldnames=csv_columns, dialect="excel", lineterminator="\n")
                 writer.writeheader()
                 for data in dict_data:
                     writer.writerow(data)
@@ -896,12 +936,14 @@ class LoadQt(QMainWindow):
                 self, "Error writing CSV", "Could not write measurement.csv")
 
         # Write settings and Struct count same as aboce for other csv
-        csv_file = fileSavePath + "\\count_test" + savefoldername + ".csv"
+        csv_file = fileSavePath  / ("stats_" + savefoldername + ".csv")
 
-        csv_columns = ["Count", "Lower TH", "Upper TH", "Area Filter", "Min Area", "Max Area", "Length Filter", "Min Lenght", "Max Length", "Eccentricity Filter",
+        csv_columns = ["Filename", "Count", "Area Mean", "Area Std", "Length Mean", "Length Std", "Eccentricity Mean", "Eccentricity Std", "Solidity Mean", "Solidity Std", "Extent Mean", "Extent Std", "Lower TH", "Upper TH", "Area Filter", "Min Area", "Max Area", "Length Filter", "Min Lenght", "Max Length", "Eccentricity Filter",
                        "Min Eccentricity", "Max Eccentricity", "Solidity Filter", "Min Solidity", "Max Solidity", "Extent Filter", "Min Extent", "Max Extent"]
 
-        dict_data = [{"Count": self.nStructs, "Lower TH": self.contrastTransformSlider_2.value(), "Upper TH": self.contrastTransformSlider_1.value(), "Area Filter": self.FiltArea, "Min Area": self.FiltMinArea,  "Max Area": self.FiltMaxArea, "Length Filter": self.FiltLength, "Min Lenght": self.FiltMinLength, "Max Length": self.FiltMaxLength,
+        
+        
+        dict_data = [{"Filename" : savefoldername, "Count": self.nStructs} | stats_dict | {"Lower TH": self.contrastTransformSlider_2.value(), "Upper TH": self.contrastTransformSlider_1.value(), "Area Filter": self.FiltArea, "Min Area": self.FiltMinArea,  "Max Area": self.FiltMaxArea, "Length Filter": self.FiltLength, "Min Lenght": self.FiltMinLength, "Max Length": self.FiltMaxLength,
                       "Eccentricity Filter": self.FiltEccentricity, "Min Eccentricity": self.FiltMinEccentricity, "Max Eccentricity": self.FiltMaxEccentricity, "Solidity Filter": self.FiltSolidity, "Min Solidity": self.FiltMinSolidity, "Max Solidity": self.FiltMaxSolidity, "Extent Filter": self.FiltExtent, "Min Extent": self.FiltMinExtent, "Max Extent": self.FiltMaxExtent}]
 
         try:
@@ -916,17 +958,18 @@ class LoadQt(QMainWindow):
                 self, "Error writing CSV", "Could not write count.csv")
 
         # Roi Coordinates
-        if np.all(self.roiPoints) and not np.all(self.roiPoints == None): # only write roi data if a selection was made
+        # only write roi data if a selection was made
+        if np.all(self.roiPoints) and not np.all(self.roiPoints == None):
             try:
-                np.savetxt(fileSavePath + "\\roiPoints_" +
-                           savefoldername + ".csv", self.roiPoints, delimiter=",")
+                np.savetxt(fileSavePath / ("roiPoints_" 
+                           + savefoldername + ".csv"), self.roiPoints, delimiter=",")
             except:
                 QMessageBox.information(
                     self, "Error Saving CSV", "Cannot save roiPoints.csv")
 
         # write image data raw to png
         try:
-            cv2.imwrite(fileSavePath + "\\raw_" + savefoldername + ".png", self.imageDataRaw, [  # write imageData to uncompressed .png File
+            cv2.imwrite(str(fileSavePath / ("raw_" + savefoldername + ".png")), self.imageDataRaw, [  # write imageData to uncompressed .png File
                 cv2.IMWRITE_PNG_COMPRESSION, 0])
         except:
             QMessageBox.information(
@@ -936,7 +979,7 @@ class LoadQt(QMainWindow):
 
         if not np.all(self.roiData == None):  # check if roi data was selected
             try:
-                cv2.imwrite(fileSavePath + "\\roi_" + savefoldername + ".png", self.roiData, [  # write imageData to uncompressed .png File
+                cv2.imwrite(str(fileSavePath / ("roi_" + savefoldername + ".png")), self.roiData, [  # write imageData to uncompressed .png File
                     cv2.IMWRITE_PNG_COMPRESSION, 0])
             except:
                 QMessageBox.information(
@@ -945,7 +988,7 @@ class LoadQt(QMainWindow):
         # write feedback data png
 
         try:
-            cv2.imwrite(fileSavePath + "\\feedback_" + savefoldername + ".png", cv2.cvtColor(self.imageDataFeedback, cv2.COLOR_BGR2RGB), [  # write imageData to uncompressed .png File
+            cv2.imwrite(str(fileSavePath / ("feedback_" + savefoldername + ".png")), cv2.cvtColor(self.imageDataFeedback, cv2.COLOR_BGR2RGB), [  # write imageData to uncompressed .png File
                 cv2.IMWRITE_PNG_COMPRESSION, 0])
         except:
             QMessageBox.information(
@@ -953,7 +996,7 @@ class LoadQt(QMainWindow):
 
         # write label data to 16bit uint image!! 2^16 possible labels can be saved
         try:
-            cv2.imwrite(fileSavePath + "\\labels_" + savefoldername + ".png", labels.astype(np.uint16), [  # write imageData to uncompressed .png File
+            cv2.imwrite(str(fileSavePath / ("labels_" + savefoldername + ".png")), labels.astype(np.uint16), [  # write imageData to uncompressed .png File
                 cv2.IMWRITE_PNG_COMPRESSION, 0])
 
             if self.nStructs >= 2**16:  # create message box if uint16 overflows
@@ -964,16 +1007,91 @@ class LoadQt(QMainWindow):
             QMessageBox.information(
                 self, "Error Saving Image", "Cannot save labels.png")
 
-        
         # mask data
         try:
-            cv2.imwrite(fileSavePath + "\\mask_" + savefoldername + ".png", self.maskData, [  # write imageData to uncompressed .png File
+            cv2.imwrite(str(fileSavePath / ("mask_" + savefoldername + ".png")), self.maskData, [  # write imageData to uncompressed .png File
                 cv2.IMWRITE_PNG_COMPRESSION, 0])
         except:
             QMessageBox.information(
                 self, "Error Saving Image", "Cannot save mask.png")
 
-# Launch app
+    def selectSavepath(self):
+        """Path dialog for selecting the save folder for measurements"""
+        ## setting defaultpath
+        if self.savePath == None: 
+            defaultpath = pathlib.Path.home()
+        else:
+            defaultpath = self.savePath
+        
+        ## open dialog
+        options = QFileDialog.Options()
+        savepath = QFileDialog.getExistingDirectory(self, "Select Savepath", str(defaultpath),  # open File Dialog
+                                                       options=options)
+
+        if not savepath:
+            return
+        else:
+            self.savePath = pathlib.Path(savepath)
+
+        self.measureTree.setRootIndex(self.measureModel.index(str(self.savePath))) ### update tree view of measure tab 
+        self.measureTree.show()
+
+    def createReport(self):
+    
+        ### read stats.csv from all selected folders in file tree
+        
+        dict_data = [] # data container for each line of csv file without headers
+    
+        for idx in self.measureTree.selectedIndexes(): # selected items idxs from measure tree
+            if idx.column() == 0:  # index has multiple components use first
+                folderPath = self.fileModel.filePath(idx) # extract path from index
+                base = os.path.basename(folderPath) # convert to pathlib
+                filepath = pathlib.Path(folderPath) / ("stats_" + base + ".csv") #create full file path of stats file
+
+                # read csv and append data to list for new csv
+                try:
+                    with open(filepath, mode="r") as inputfile: #open csv reader
+                        reader = csv.DictReader(inputfile)
+
+                        for row in reader:  # read line without header
+                            dict_data.append(row) #append on new write dict
+                except:
+                    QMessageBox.information(self, "Error reading CSV", f"Could not read {filepath}")
+
+        
+        # create unique report filename !! (avoid overwriting)
+        
+        count = 1
+        savefilename = f"report_{count}.csv"  # create report filename
+
+        # create folder name until specifier is available. Increment number until a name is available
+        while os.path.exists(self.savePath / savefilename):
+            count += 1  # increment number
+            savefilename = f"report_{count}.csv" 
+
+        
+        ### writing new csv file 
+        
+        csv_file = self.savePath  / savefilename # path of report csv file
+
+        # writing process 
+        
+        csv_columns = ["Filename", "Count", "Area Mean", "Area Std", "Length Mean", "Length Std", "Eccentricity Mean", "Eccentricity Std", "Solidity Mean", "Solidity Std", "Extent Mean", "Extent Std", "Lower TH", "Upper TH", "Area Filter", "Min Area", "Max Area", "Length Filter", "Min Lenght", "Max Length", "Eccentricity Filter",
+                       "Min Eccentricity", "Max Eccentricity", "Solidity Filter", "Min Solidity", "Max Solidity", "Extent Filter", "Min Extent", "Max Extent"]
+
+        try:
+            with open(csv_file, 'w') as csvfile:
+                writer = csv.DictWriter(
+                    csvfile, fieldnames=csv_columns, lineterminator="\n")
+                writer.writeheader()
+                for data in dict_data:
+                    writer.writerow(data)
+        except IOError:
+            QMessageBox.information(
+                self, "Error writing CSV", "Could not write report.csv")
+
+                
+# Launch apps
 
 
 def main():

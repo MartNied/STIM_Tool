@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1167</width>
-    <height>641</height>
+    <width>1144</width>
+    <height>614</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -133,6 +133,9 @@
          <height>0</height>
         </size>
        </property>
+       <property name="contextMenuPolicy">
+        <enum>Qt::CustomContextMenu</enum>
+       </property>
        <property name="currentIndex">
         <number>0</number>
        </property>
@@ -157,6 +160,21 @@
         <attribute name="title">
          <string>Measurements</string>
         </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_4">
+         <item>
+          <widget class="QTreeView" name="measureTree">
+           <property name="contextMenuPolicy">
+            <enum>Qt::CustomContextMenu</enum>
+           </property>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::MultiSelection</enum>
+           </property>
+           <property name="itemsExpandable">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </widget>
      </widget>
@@ -653,7 +671,7 @@
             <bool>false</bool>
            </property>
            <property name="invertedControls">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -735,7 +753,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1167</width>
+     <width>1144</width>
      <height>21</height>
     </rect>
    </property>
@@ -744,7 +762,7 @@
      <string>File</string>
     </property>
     <addaction name="openAction"/>
-    <addaction name="saveRoiAction"/>
+    <addaction name="selectSavepathAction"/>
     <addaction name="separator"/>
     <addaction name="exitAction"/>
    </widget>
@@ -874,12 +892,9 @@
     <string>3</string>
    </property>
   </action>
-  <action name="saveRoiAction">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
+  <action name="selectSavepathAction">
    <property name="text">
-    <string>Save Roi</string>
+    <string>Select Savepath</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
