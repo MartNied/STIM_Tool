@@ -15,12 +15,12 @@ Setting Default Vals: Area: min 5, max 300, Lower TH: 23, Upper TH 36 (done)
 
 # Open Tasks
 
-do measurement - write single csv for each selection 
+do measurement - write single csv for each selection (done)
 
-create report file
+create report file (done)
 
-Save selection and correpsonding images when doing measurement
+Save selection and correpsonding images when doing measurement (done)
 
-select savepath for measurements like selection of open path 
+select savepath for measurements like selection of open path (done)
 
 

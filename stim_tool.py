@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from PyQt5 import QtCore
 from PyQt5 import QtGui, uic
 from PyQt5 import QtWidgets
@@ -313,6 +315,15 @@ class LoadQt(QMainWindow):
 
         if not filePath:  # if file dialog is canceled filename is bool-false
             return
+
+        #fix non ascii path bug by checking if filepath only consist of ansii chars
+        try:
+            raw = filePath.encode()
+            raw.decode('ascii') #try if path byte string is ascii encodeable (imread only supports ascii paths)
+        except UnicodeDecodeError:
+            QMessageBox.information(self, "Filepath Error","Non ASCII characters (ö, ä , ü, ß ...) are not supported in your Path!\nPlease rename your folders!")
+            return
+
         else:
 
             # do some file path operations
@@ -331,8 +342,10 @@ class LoadQt(QMainWindow):
             # needs to be adapated if non grayscale images are imported (0 flag for Grayscale images)
             if self.colorspace == 0:
 
-                image_import = cv2.imread(filePath, cv2.IMREAD_GRAYSCALE)
+            
 
+                image_import = cv2.imread(filePath, cv2.IMREAD_GRAYSCALE) #imread and imwrite cannot handle utf-8 characters like ü ö ä. Keep that in mind !!
+              
                 if self.fileExt == ".tif":  # if tif file is importet preprocess it
 
                     # clip intensity values above certain value
@@ -443,8 +456,20 @@ class LoadQt(QMainWindow):
         else:
             filePath, _ = QFileDialog.getSaveFileName(
                 self, "Save Image", "", "Image Files (*.png)")
+            
             if not filePath:
                 return
+            
+             #fix non ascii path bug by checking if it only contains ansii chars
+            try:
+                raw = filePath.encode()
+                raw.decode('ascii') #try if path byte string is ascii encodeable (imread only supports ascii paths)
+            except UnicodeDecodeError:
+                QMessageBox.information(
+                    self, "Filepath Error","Non ASCII characters (ö, ä , ü, ß ...) are not supported in your Path!\nPlease rename your folders!")
+                return
+            
+            ### keep on going with filepath
             else:
                 try:
                     cv2.imwrite(filePath, data, [  # write imageData to uncompressed .png File
@@ -1030,6 +1055,16 @@ class LoadQt(QMainWindow):
 
         if not savepath:
             return
+        
+        #fix non ascii path bug, by checking if path only includes ascii chars
+        try:
+            raw = savepath.encode()
+            raw.decode('ascii') #try if path byte string is ascii encodeable (imread only supports ascii paths)
+        except UnicodeDecodeError:
+            QMessageBox.information(
+                    self, "Filepath Error","Non ASCII characters (ö, ä , ü, ß ...) are not supported in your Path!\nPlease rename your folders!")
+            return
+
         else:
             self.savePath = pathlib.Path(savepath)
 
