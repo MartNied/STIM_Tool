@@ -58,26 +58,54 @@ class LoadQt(QMainWindow):
         # alpha value for blending mask over process images (see doVisualFeedback function)
         self.alphaBlend = 0.3
 
+
         # filter default settings
-        self.FiltMinArea = 5
-        self.FiltMaxArea = 300  # 361920 max resolution
-        self.FiltMinLength = 0
-        self.FiltMaxLength = 1000
-        self.FiltMinEccentricity = 0.0
-        self.FiltMaxEccentricity = 1.0
-        self.FiltMinSolidity = 0.6
-        self.FiltMaxSolidity = 1.0
-        self.FiltMinExtent = 0.2
-        self.FiltMaxExtent = 1.0
+        self.FiltMinArea_ActiveDefault = 5 
+        self.FiltMinArea_RestingDefault = 100
+        self.FiltMaxArea_ActiveDefault = 300  # 361920 max resolution 
+        self.FiltMaxArea_RestingDefault= 100 # 361920 max resolution
+        self.FiltMinLength_ActiveDefault = 0 
+        self.FiltMinLength_RestingDefault = 100
+        self.FiltMaxLength_ActiveDefault = 1000 
+        self.FiltMaxLength_RestingDefault = 100
+        self.FiltMinEccentricity_ActiveDefault = 0.0 
+        self.FiltMinEccentricity_RestingDefault = 1.0
+        self.FiltMaxEccentricity_ActiveDefault = 1.0 
+        self.FiltMaxEccentricity_RestingDefault = 1.0
+        self.FiltMinSolidity_ActiveDefault = 0.6 
+        self.FiltMinSolidity_RestingDefault = 1.0
+        self.FiltMaxSolidity_ActiveDefault = 1.0 
+        self.FiltMaxSolidity_RestingDefault = 1.0
+        self.FiltMinExtent_ActiveDefault = 0.2 
+        self.FiltMinExtent_RestingDefault = 1.0
+        self.FiltMaxExtent_ActiveDefault = 1.0 
+        self.FiltMaxExtent_RestingDefault = 1.0
+        
+        
+        self.FiltMinArea = self.FiltMinArea_ActiveDefault# assign defaults values to class attributes
+        self.FiltMaxArea = self.FiltMaxArea_ActiveDefault # 361920 max resolution
+        self.FiltMinLength = self.FiltMinLength_ActiveDefault
+        self.FiltMaxLength = self.FiltMaxLength_ActiveDefault
+        self.FiltMinEccentricity = self.FiltMinEccentricity_ActiveDefault
+        self.FiltMaxEccentricity = self.FiltMaxEccentricity_ActiveDefault
+        self.FiltMinSolidity = self.FiltMinSolidity_ActiveDefault
+        self.FiltMaxSolidity = self.FiltMaxSolidity_ActiveDefault
+        self.FiltMinExtent = self.FiltMinExtent_ActiveDefault
+        self.FiltMaxExtent = self.FiltMaxExtent_ActiveDefault
         self.FiltArea = True
         self.FiltLength = False
         self.FiltEccentricity = False
         self.FiltSolidity = False
         self.FiltExtent = False
-
+        
         # default values for Contrast sliders
-        self.contrastTransformSlider_1Default = 36
-        self.contrastTransformSlider_2Default = 23
+        self.contrastTransformSlider_1ActiveDefault = 36 #set default values
+        self.contrastTransformSlider_2ActiveDefault = 23
+        self.contrastTransformSlider_1RestingDefault = 100
+        self.contrastTransformSlider_2RestingDefault = 1
+
+        self.contrastTransformSlider_1Default = self.contrastTransformSlider_1ActiveDefault #assign defaults to class attributes
+        self.contrastTransformSlider_2Default = self.contrastTransformSlider_2ActiveDefault
 
         # create some properties
         self.fileName = ""  # filename of currently loaded Image
@@ -86,6 +114,7 @@ class LoadQt(QMainWindow):
         self.folderPath = None  # Folder Path of currently opened Image
         self.savePath = None  # Path where measurement will be saved
         self.activeTool = "roi"  # active tool to begin with
+        self.activeEvalMode = "active"
 
         # pix map attributes
         self.pixmapFeedback = None  # Qt Pixmap of current shown Image in Feedback window
@@ -132,6 +161,10 @@ class LoadQt(QMainWindow):
             functools.partial(self.openImage, "dialog"))
         self.exitAction.triggered.connect(self.close)
         self.selectSavepathAction.triggered.connect(self.selectSavepath)
+        self.toggleActiveAction.triggered.connect(
+            functools.partial(self.setEvalMode, "active"))
+        self.toggleRestingAction.triggered.connect(
+            functools.partial(self.setEvalMode, "resting"))
 
         # tools in sidebar
         self.dragAction.triggered.connect(
@@ -162,6 +195,7 @@ class LoadQt(QMainWindow):
             self.doContrastTransform)
         self.contrastTransformSlider_2.valueChanged.connect(
             self.doContrastTransform)
+
 
     def wireCheckBoxes(self):
         # set default values
@@ -342,8 +376,6 @@ class LoadQt(QMainWindow):
             # needs to be adapated if non grayscale images are imported (0 flag for Grayscale images)
             if self.colorspace == 0:
 
-            
-
                 image_import = cv2.imread(filePath, cv2.IMREAD_GRAYSCALE) #imread and imwrite cannot handle utf-8 characters like ü ö ä. Keep that in mind !!
               
                 if self.fileExt == ".tif":  # if tif file is importet preprocess it
@@ -358,7 +390,7 @@ class LoadQt(QMainWindow):
                 else:
                     self.imageDataRaw = image_import
 
-            # if a no image file is loades a message box will pop up
+            # if a no image file is loades a message box will pop upo
             if np.all(self.imageDataRaw == None):
                 QMessageBox.information(
                     self, "Error Loading Image", "Cannot load %s." % filePath)
@@ -375,8 +407,11 @@ class LoadQt(QMainWindow):
             self.contrastTransformSlider_2.setValue(
                 self.contrastTransformSlider_2Default)
 
+            #enable some functionality when image is loaded! --> avoids errors :)
             self.contrastTransformGroupBox.setEnabled(True)
             self.filterGroupBox.setEnabled(True)
+            self.toggleActiveAction.setEnabled(True) 
+            self.toggleRestingAction.setEnabled(True)
 
             # reset some attributes to None
             self.labelData = None
@@ -596,8 +631,62 @@ class LoadQt(QMainWindow):
     def setBottomLabel(self):
         "creates a string which is displayed in the bottom laybel for user information"
         dispStr = " File: " + self.fileName + "       Lower Th: " + str(self.contrastTransformSlider_2.value()) + "       Upper Th: " + str(
-            self.contrastTransformSlider_1.value()) + "        Struct count: " + str(self.nStructs) + "        Interaction Mode: " + self.activeTool
+            self.contrastTransformSlider_1.value()) + "        Struct count: " + str(self.nStructs) + "        Interaction Mode: " + self.activeTool + "        Eval Mode: " + self.activeEvalMode
         self.bottomLabel.setText(dispStr)
+
+
+    def setEvalMode(self, mode):
+
+        if mode == "active":
+            self.contrastTransformSlider_1Default = self.contrastTransformSlider_1ActiveDefault #assign defaults to class attributes
+            self.contrastTransformSlider_2Default = self.contrastTransformSlider_2ActiveDefault
+            self.FiltMinArea = self.FiltMinArea_ActiveDefault
+            self.FiltMaxArea = self.FiltMaxArea_ActiveDefault 
+            self.FiltMinLength = self.FiltMinLength_ActiveDefault
+            self.FiltMaxLength = self.FiltMaxLength_ActiveDefault
+            self.FiltMinEccentricity = self.FiltMinEccentricity_ActiveDefault
+            self.FiltMaxEccentricity = self.FiltMaxEccentricity_ActiveDefault
+            self.FiltMinSolidity = self.FiltMinSolidity_ActiveDefault
+            self.FiltMaxSolidity = self.FiltMaxSolidity_ActiveDefault
+            self.FiltMinExtent = self.FiltMinExtent_ActiveDefault
+            self.FiltMaxExtent = self.FiltMaxExtent_ActiveDefault
+
+        elif mode == "resting": 
+            self.contrastTransformSlider_1Default = self.contrastTransformSlider_1RestingDefault #assign defaults to class attributes
+            self.contrastTransformSlider_2Default = self.contrastTransformSlider_2RestingDefault
+            self.FiltMinArea = self.FiltMinArea_RestingDefault# assign defaults values to class attributes
+            self.FiltMaxArea = self.FiltMaxArea_RestingDefault # 361920 max resolution
+            self.FiltMinLength = self.FiltMinLength_RestingDefault
+            self.FiltMaxLength = self.FiltMaxLength_RestingDefault
+            self.FiltMinEccentricity = self.FiltMinEccentricity_RestingDefault
+            self.FiltMaxEccentricity = self.FiltMaxEccentricity_RestingDefault
+            self.FiltMinSolidity = self.FiltMinSolidity_RestingDefault
+            self.FiltMaxSolidity = self.FiltMaxSolidity_RestingDefault
+            self.FiltMinExtent = self.FiltMinExtent_RestingDefault
+            self.FiltMaxExtent = self.FiltMaxExtent_RestingDefault
+
+        
+        #set all the values in the according elements
+        self.minAreaFilterSpinBox.setValue(self.FiltMinArea)
+        self.minLengthFilterSpinBox.setValue(self.FiltMinLength)
+        self.minEccentFilterSpinBox.setValue(self.FiltMinEccentricity)
+        self.minSolidityFilterSpinBox.setValue(self.FiltMinSolidity)
+        self.minExtentFilterSpinBox.setValue(self.FiltMinExtent)
+        self.maxAreaFilterSpinBox.setValue(self.FiltMaxArea)
+        self.maxLengthFilterSpinBox.setValue(self.FiltMaxLength)
+        self.maxEccentFilterSpinBox.setValue(self.FiltMaxEccentricity)
+        self.maxSolidityFilterSpinBox.setValue(self.FiltMaxSolidity)
+        self.maxExtentFilterSpinBox.setValue(self.FiltMaxExtent)
+        self.contrastTransformSlider_1.setValue(
+        self.contrastTransformSlider_1Default)
+        self.contrastTransformSlider_2.setValue(
+        self.contrastTransformSlider_2Default)
+
+        #switch mode and set bottom label
+        self.activeEvalMode = mode
+        self.setBottomLabel()
+
+
 
     def toolSelector(self, selected_tool="roi"):
         """sets tool attribute of Photoviewer so that the correct tool from the Toolbar is selected"""
@@ -632,12 +721,19 @@ class LoadQt(QMainWindow):
             self.eraseAction.setChecked(False)
 
         elif selected_tool == "roi":
+
             self.dragAction.setChecked(False)
             self.roiAction.setChecked(True)
             self.cutAction.setChecked(False)
             self.eraseAction.setChecked(False)
 
+
+            ## TODO
             self.undoMasking()
+            self.viewerFeedback._polygon_item.removeAllPoints()
+            self.roiData = None
+            self.viewerFeedback._roimode = "active"
+            ## TODO
 
             self.maskGroupBox.setEnabled(False)
             self.roiGroupBox.setEnabled(True)
@@ -801,9 +897,9 @@ class LoadQt(QMainWindow):
         if self.maskData is None:  # if no mask data is available do nothing
             return
 
-        # save press and release QT points as numpy arrays
-        pp = np.array([press_point.x(), press_point.y()])
-        rp = np.array([release_point.x(), release_point.y()])
+        # save press and release QT points as tuples
+        pp = tuple([press_point.x(), press_point.y()])
+        rp = tuple([release_point.x(), release_point.y()])
 
         # draw line with black color over mask data --> setting the zeros in the mask to zero :)
         cv2.line(self.maskData, pp, rp, 0, thickness=1, lineType=4, shift=0)

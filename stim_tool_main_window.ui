@@ -766,7 +766,15 @@
     <addaction name="separator"/>
     <addaction name="exitAction"/>
    </widget>
+   <widget class="QMenu" name="menuSettings">
+    <property name="title">
+     <string>Eval Mode</string>
+    </property>
+    <addaction name="toggleActiveAction"/>
+    <addaction name="toggleRestingAction"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuSettings"/>
   </widget>
   <widget class="QToolBar" name="toolBar">
    <property name="enabled">
@@ -898,6 +906,40 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionPresets">
+   <property name="text">
+    <string>Presets</string>
+   </property>
+  </action>
+  <action name="actionactiv_mode">
+   <property name="text">
+    <string>activ mode</string>
+   </property>
+  </action>
+  <action name="actionresting_mode">
+   <property name="text">
+    <string>resting mode</string>
+   </property>
+  </action>
+  <action name="toggleActiveAction">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Active</string>
+   </property>
+  </action>
+  <action name="toggleRestingAction">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Resting</string>
    </property>
   </action>
  </widget>
